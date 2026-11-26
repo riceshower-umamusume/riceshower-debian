@@ -30,7 +30,10 @@ Repo này mới bắt đầu lại lịch sử; không mang roadmap đa distro c
 - [x] 5/5 component build/staging đã chạy thật trên host Debian sid cũ.
 - [ ] Build 5/5 trong container stable/testing/sid của repo mới.
 
-## Giai đoạn 4 — Stable private dependency builder
+## Dotfiles/hardware đã có bản đầu tiên: config Umbriel/Noctalia/fcitx5/shell, backup/state,
+display 1920x1080@144, app catalog. Còn app install, DNS, GPU package profiles, wizard.
+
+Giai đoạn 4 — Stable private dependency builder
 
 - [ ] Pin source/SHA và recipe cho wlroots, wayland stack, libinput, xkbcommon,
   libdisplay-info, libei, sdbus-c++, WirePlumber.

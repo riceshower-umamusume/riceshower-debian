@@ -4,9 +4,13 @@ Noctalia full-ecosystem installer for **Debian stable, testing and sid**, built 
 
 > **Status: engine ported, installer not finished.** The repo was created fresh after
 > deleting the three previous Noctalia setup repositories. The manifest, dependency
-> preflight, source cache and Meson build/staging engine are ported and tested. Deploy,
-> the stable private-dependency builder, the wizard, greeter setup, update/repair and
-> uninstall are still missing. This is not yet a "clone and it installs everything" repo.
+> preflight, source cache and Meson build/staging engine are ported and tested. A first
+> personal dotfiles layer is now present: hardware detection, Umbriel/Noctalia/fcitx5/
+> shell configs with backup/state, generated display mode (currently 1920x1080@144),
+> and an app catalog (fcitx5-lotus, Brave Origin Nightly). Deploy, the stable private-
+> dependency builder, the wizard, app installation, DNS/GPU profiles, greeter setup,
+> update/repair, uninstall and VM validation are still missing. This is not yet a
+> "clone and it installs everything" repo.
 
 ## Scope
 
@@ -47,8 +51,12 @@ git clone https://github.com/riceshower-umamusume/riceshower-debian.git
 cd riceshower-debian
 
 ./install.sh doctor
+./install.sh hardware
 ./install.sh list-components
+./install.sh list-apps
 ./install.sh install --dry-run
+./install.sh config --dry-run
+./install.sh config
 ./install.sh build umbriel
 
 cargo test
@@ -65,18 +73,21 @@ src/                 Rust CLI, manifest, distro/version detection, preflight, so
 manifest/components/ five component manifests with build requirements
 manifest/distros/    debian-stable.toml, debian-testing.toml, debian-sid.toml
 manifest/lock/       source snapshot used by the build command
+dotfiles/            personal config manifest + Umbriel/Noctalia/fcitx5/shell files
+apps/                app catalog (fcitx5-lotus, Brave Origin Nightly)
 docs/                design, roadmap, dependency audit
 install.sh           bootstrap wrapper
 ```
 
 ## Next work
 
-1. Stable private-dependency builder into `/opt/noctalia/deps` (wlroots, wayland stack,
-   libinput, xkbcommon, libdisplay-info, libei, sdbus-c++, WirePlumber).
-2. Deploy transaction to `/usr/local` with backup/state/rollback.
-3. Wizard and `--yes` defaults.
-4. Greeter/PAM/getty integration, opt-in and rollback-safe.
-5. Update/repair/uninstall and clean Debian stable/testing/sid VM validation.
+1. App installation from the catalog, starting with fcitx5-lotus and Brave.
+2. DNS config module and GPU vendor package profiles.
+3. Stable private-dependency builder into `/opt/noctalia/deps`.
+4. Deploy transaction to `/usr/local` with backup/state/rollback.
+5. Wizard and `--yes` defaults.
+6. Greeter/PAM/getty integration, opt-in and rollback-safe.
+7. Update/repair/uninstall and clean Debian stable/testing/sid VM validation.
 
 ## License
 

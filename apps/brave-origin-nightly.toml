@@ -1,0 +1,6 @@
+id = "brave-origin-nightly"
+name = "Brave Origin Nightly"
+kind = "apt"
+repo = "https://brave-browser-apt-nightly.s3.brave.com/"
+packages = ["brave-origin-nightly"]
+notes = "Official Brave nightly APT repository; source build is not practical for Chromium."

@@ -1,8 +1,10 @@
+use crate::apps;
 use crate::cli::{Cli, Command};
 use crate::distro;
 use crate::manifest::{self, DistroManifest, Manifest};
 use anyhow::{bail, Context, Result};
 mod build;
+mod config;
 mod doctor;
 mod install;
 mod uninstall;
@@ -18,6 +20,8 @@ use update::update_plan;
 pub fn run(cli: Cli) -> Result<()> {
     let Cli {
         manifest_dir,
+        dotfiles_dir,
+        apps_dir,
         dry_run,
         command,
         ..
@@ -25,6 +29,9 @@ pub fn run(cli: Cli) -> Result<()> {
     let manifest = manifest::load(&manifest_dir)
         .with_context(|| format!("loading manifest from {}", manifest_dir.display()))?;
     match command {
+        Command::Config => config::config(&dotfiles_dir, dry_run),
+        Command::Hardware => config::hardware_command(),
+        Command::ListApps => apps::print(&apps_dir),
         Command::Build { component, commit } => {
             build_component(&manifest, &component, commit.as_deref(), dry_run)
         }

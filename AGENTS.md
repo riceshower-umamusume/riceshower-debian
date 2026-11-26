@@ -32,6 +32,9 @@ before broad file reading; run `codegraph sync` after structural changes. Never 
   defaults and still show the sudo action. Do not make silent destructive choices.
 - **`/usr` is off-limits for this repo.** The previous installation at `/usr` is not
   migrated or removed automatically.
+- **Dotfiles layer**: `dotfiles/manifest.toml` is the source of truth; apply copies with
+  backup and state, never silently overwrites. Display settings are generated from
+  `hardware` (GPU/output/best mode). Do not commit secrets; app catalog is `apps/*.toml`.
 - Run before finishing: `cargo fmt --all -- --check`,
   `cargo clippy --all-targets -- -D warnings`, `cargo test --all`,
   `cargo build --release`, `shellcheck install.sh`.

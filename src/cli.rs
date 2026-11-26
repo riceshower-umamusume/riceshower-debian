@@ -20,6 +20,14 @@ pub struct Cli {
     #[arg(long, short = 'y', global = true)]
     pub yes: bool,
 
+    /// Directory containing the dotfiles manifest and files
+    #[arg(long, global = true, default_value = "dotfiles", value_name = "DIR")]
+    pub dotfiles_dir: PathBuf,
+
+    /// Directory containing app catalog manifests
+    #[arg(long, global = true, default_value = "apps", value_name = "DIR")]
+    pub apps_dir: PathBuf,
+
     #[command(subcommand)]
     pub command: Command,
 }
@@ -57,6 +65,12 @@ pub enum Command {
         #[arg(long)]
         commit: Option<String>,
     },
+    /// Apply user dotfiles and detected display configuration
+    Config,
+    /// Print detected GPU/output/mode information
+    Hardware,
+    /// List the app catalog
+    ListApps,
     /// List components from the manifest
     ListComponents,
     /// Adopt an installation created by the legacy scripts

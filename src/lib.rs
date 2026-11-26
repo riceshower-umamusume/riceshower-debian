@@ -1,8 +1,11 @@
+mod apps;
 mod atomic_file;
 pub mod build;
 pub mod cli;
 pub mod commands;
 pub mod distro;
+pub mod dotfiles;
+pub mod hardware;
 pub mod manifest;
 mod plan;
 mod preflight;
