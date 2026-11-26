@@ -28,6 +28,10 @@ pub(super) fn config(dotfiles_dir: &Path, dry_run: bool) -> Result<()> {
 pub(super) fn hardware_command() -> Result<()> {
     let detected = hardware::detect(&SystemRunner)?;
     println!("gpu: {}", detected.gpu);
+    println!(
+        "recommended packages: {}",
+        detected.gpu.recommended_packages().join(", ")
+    );
     if detected.outputs.is_empty() {
         println!("outputs: unavailable (is Umbriel running?)");
     }

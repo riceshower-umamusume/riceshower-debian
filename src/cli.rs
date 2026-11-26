@@ -71,6 +71,8 @@ pub enum Command {
     Hardware,
     /// List the app catalog
     ListApps,
+    /// Install one app from the catalog
+    InstallApp { id: String },
     /// List components from the manifest
     ListComponents,
     /// Adopt an installation created by the legacy scripts

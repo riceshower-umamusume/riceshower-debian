@@ -1,4 +1,5 @@
-use anyhow::{Context, Result};
+use crate::process::Runner;
+use anyhow::{bail, Context, Result};
 use serde::Deserialize;
 use std::fs;
 use std::path::Path;
@@ -35,6 +36,42 @@ pub fn load(directory: &Path) -> Result<Vec<AppManifest>> {
     Ok(apps)
 }
 
+pub fn install(directory: &Path, id: &str, dry_run: bool, runner: &dyn Runner) -> Result<()> {
+    let app = load(directory)?
+        .into_iter()
+        .find(|app| app.id == id)
+        .with_context(|| format!("unknown app '{id}'"))?;
+    if app.kind != "apt" {
+        bail!("app '{}' uses unsupported kind '{}'", app.id, app.kind);
+    }
+    if app.packages.is_empty() {
+        bail!("app '{}' has no packages", app.id);
+    }
+    println!("app: {} ({})", app.id, app.name);
+    println!("  repository: {}", app.repo);
+    println!("  packages: {}", app.packages.join(", "));
+    if dry_run {
+        println!(
+            "dry-run: sudo apt-get install -y --no-install-recommends {}",
+            app.packages.join(" ")
+        );
+        return Ok(());
+    }
+    let mut args = vec!["--", "apt-get", "install", "-y", "--no-install-recommends"];
+    args.extend(app.packages.iter().map(String::as_str));
+    let output = runner.run("sudo", &args)?;
+    if !output.success {
+        let details = if output.stderr.trim().is_empty() {
+            output.stdout.trim()
+        } else {
+            output.stderr.trim()
+        };
+        bail!("apt-get failed for '{}': {details}", app.id);
+    }
+    println!("installed: {}", app.id);
+    Ok(())
+}
+
 pub fn print(directory: &Path) -> Result<()> {
     for app in load(directory)? {
         println!(
@@ -49,4 +86,48 @@ pub fn print(directory: &Path) -> Result<()> {
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::process::CommandOutput;
+    use std::fs;
+
+    struct FakeSudo;
+
+    impl Runner for FakeSudo {
+        fn run(&self, program: &str, args: &[&str]) -> Result<CommandOutput> {
+            assert_eq!(program, "sudo");
+            assert_eq!(args[0], "--");
+            assert_eq!(args[1], "apt-get");
+            assert!(args.contains(&"fcitx5-lotus"));
+            Ok(CommandOutput {
+                success: true,
+                code: Some(0),
+                stdout: String::new(),
+                stderr: String::new(),
+            })
+        }
+
+        fn run_with_stdin(
+            &self,
+            _program: &str,
+            _args: &[&str],
+            _input: &str,
+        ) -> Result<CommandOutput> {
+            bail!("stdin is not used")
+        }
+    }
+
+    #[test]
+    fn install_app_uses_sudo_apt() {
+        let directory = tempfile::tempdir().unwrap();
+        fs::write(
+            directory.path().join("lotus.toml"),
+            "id = \"fcitx5-lotus\"\nname = \"Lotus\"\nkind = \"apt\"\nrepo = \"https://example.invalid\"\npackages = [\"fcitx5-lotus\"]\n",
+        )
+        .unwrap();
+        install(directory.path(), "fcitx5-lotus", false, &FakeSudo).unwrap();
+    }
 }

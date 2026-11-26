@@ -53,6 +53,9 @@ builder cho stable, wizard, greeter setup, update/repair/uninstall, CI matrix v�
   theo resolution rồi refresh; hiện tại DP-1 1920x1080@144.
 - `config` sinh `~/.config/umbriel/display.toml`, Umbriel include file này.
 - `apps/*.toml` là catalog app; hiện có fcitx5-lotus và Brave Origin Nightly.
-  Chưa có engine cài app; đây là bước tiếp theo.
+  `install-app <id>` cài bằng `sudo apt-get` từ repo mà catalog khai báo; dry-run
+  in lệnh. Chưa hỗ trợ source build cho app.
+- `hardware` in thêm package GPU đề xuất theo vendor (AMD/Intel/NVIDIA); chưa tự
+  cài driver/package.
 - Không đưa DNS/private value hoặc token vào repo public; module DNS/private sẽ có
   local override riêng.

@@ -31,7 +31,8 @@ Repo này mới bắt đầu lại lịch sử; không mang roadmap đa distro c
 - [ ] Build 5/5 trong container stable/testing/sid của repo mới.
 
 ## Dotfiles/hardware đã có bản đầu tiên: config Umbriel/Noctalia/fcitx5/shell, backup/state,
-display 1920x1080@144, app catalog. Còn app install, DNS, GPU package profiles, wizard.
+display 1920x1080@144, app catalog, `install-app` apt và GPU package profiles.
+Còn DNS, wizard, app source build và engine Noctalia install/deploy.
 
 Giai đoạn 4 — Stable private dependency builder
 

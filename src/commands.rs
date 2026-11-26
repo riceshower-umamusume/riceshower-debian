@@ -2,6 +2,7 @@ use crate::apps;
 use crate::cli::{Cli, Command};
 use crate::distro;
 use crate::manifest::{self, DistroManifest, Manifest};
+use crate::process::SystemRunner;
 use anyhow::{bail, Context, Result};
 mod build;
 mod config;
@@ -32,6 +33,7 @@ pub fn run(cli: Cli) -> Result<()> {
         Command::Config => config::config(&dotfiles_dir, dry_run),
         Command::Hardware => config::hardware_command(),
         Command::ListApps => apps::print(&apps_dir),
+        Command::InstallApp { id } => apps::install(&apps_dir, &id, dry_run, &SystemRunner),
         Command::Build { component, commit } => {
             build_component(&manifest, &component, commit.as_deref(), dry_run)
         }

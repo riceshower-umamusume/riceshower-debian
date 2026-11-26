@@ -7,7 +7,8 @@ Noctalia full-ecosystem installer for **Debian stable, testing and sid**, built 
 > preflight, source cache and Meson build/staging engine are ported and tested. A first
 > personal dotfiles layer is now present: hardware detection, Umbriel/Noctalia/fcitx5/
 > shell configs with backup/state, generated display mode (currently 1920x1080@144),
-> and an app catalog (fcitx5-lotus, Brave Origin Nightly). Deploy, the stable private-
+> an app catalog (fcitx5-lotus, Brave Origin Nightly), `install-app` apt installation
+> and GPU package recommendations. Deploy, the stable private-
 > dependency builder, the wizard, app installation, DNS/GPU profiles, greeter setup,
 > update/repair, uninstall and VM validation are still missing. This is not yet a
 > "clone and it installs everything" repo.
@@ -54,6 +55,7 @@ cd riceshower-debian
 ./install.sh hardware
 ./install.sh list-components
 ./install.sh list-apps
+./install.sh install-app fcitx5-lotus --dry-run
 ./install.sh install --dry-run
 ./install.sh config --dry-run
 ./install.sh config

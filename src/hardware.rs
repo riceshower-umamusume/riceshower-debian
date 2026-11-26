@@ -11,6 +11,26 @@ pub enum GpuVendor {
     Unknown,
 }
 
+impl GpuVendor {
+    pub fn recommended_packages(self) -> &'static [&'static str] {
+        match self {
+            GpuVendor::Amd => &[
+                "firmware-amd-graphics",
+                "mesa-vulkan-drivers",
+                "vulkan-tools",
+            ],
+            GpuVendor::Intel => &[
+                "firmware-intel-graphics",
+                "intel-media-va-driver",
+                "mesa-vulkan-drivers",
+                "vulkan-tools",
+            ],
+            GpuVendor::Nvidia => &["nvidia-driver", "nvidia-vulkan-icd"],
+            GpuVendor::Unknown => &[],
+        }
+    }
+}
+
 impl fmt::Display for GpuVendor {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         formatter.write_str(match self {
@@ -190,6 +210,13 @@ mod tests {
         fs::create_dir_all(&device).unwrap();
         fs::write(device.join("vendor"), "0x1002\n").unwrap();
         assert_eq!(detect_gpu(directory.path()), GpuVendor::Amd);
+    }
+
+    #[test]
+    fn recommends_amd_graphics_packages() {
+        assert!(GpuVendor::Amd
+            .recommended_packages()
+            .contains(&"mesa-vulkan-drivers"));
     }
 
     #[test]
