@@ -53,6 +53,8 @@ Noctalia full-ecosystem installer for **Debian stable, testing and sid**, built 
 git clone https://github.com/riceshower-umamusume/riceshower-debian.git
 cd riceshower-debian
 
+./install.sh            # wizard: distro, GPU, DNS, dotfiles, apps
+./install.sh --dry-run  # wizard plan only
 ./install.sh doctor
 ./install.sh hardware
 ./install.sh list-components

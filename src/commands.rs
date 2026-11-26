@@ -11,12 +11,14 @@ mod install;
 mod uninstall;
 mod update;
 mod version;
+mod wizard;
 
 use build::build_component;
 use doctor::doctor;
 use install::{install_plan, InstallOptions};
 use uninstall::uninstall_plan;
 use update::update_plan;
+use wizard::wizard;
 
 pub fn run(cli: Cli) -> Result<()> {
     let Cli {
@@ -30,6 +32,9 @@ pub fn run(cli: Cli) -> Result<()> {
     } = cli;
     let manifest = manifest::load(&manifest_dir)
         .with_context(|| format!("loading manifest from {}", manifest_dir.display()))?;
+    let Some(command) = command else {
+        return wizard(&manifest, dry_run, yes, &dotfiles_dir, &apps_dir);
+    };
     match command {
         Command::Config => config::config(&dotfiles_dir, dry_run),
         Command::Hardware => config::hardware_command(),

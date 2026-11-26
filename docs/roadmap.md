@@ -50,7 +50,9 @@ Giai đoạn 4 — Stable private dependency builder
 
 ## Giai đoạn 6 — Wizard, `--yes`, greeter
 
-- [ ] Wizard mặc định; `--yes` dùng defaults.
+- [x] Wizard mặc định (không subcommand): distro/GPU/output/DNS/dotfiles/apps.
+- [x] `--dry-run` in kế hoạch; `--yes` áp dụng dotfiles/display.
+- [ ] Wizard chạy luôn install Noctalia + app; hiện vẫn là lệnh riêng.
 - [ ] Greeter opt-in `--greeter`; không tự đổi DM; PAM/getty rollback-safe.
 
 ## Giai đoạn 7 — Update/repair/uninstall

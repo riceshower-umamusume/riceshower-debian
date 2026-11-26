@@ -29,7 +29,7 @@ pub struct Cli {
     pub apps_dir: PathBuf,
 
     #[command(subcommand)]
-    pub command: Command,
+    pub command: Option<Command>,
 }
 
 #[derive(Debug, Subcommand)]

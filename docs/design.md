@@ -44,7 +44,13 @@ Tài liệu này ghi các quyết định đã chốt cho repo mới. Repo cũ v
 Meson build/staging/inventory, tests. Chưa có: deploy transaction, private dependency
 builder cho stable, wizard, greeter setup, update/repair/uninstall, CI matrix và release.
 
-## 6. Dotfiles, hardware và app catalog
+## 6. Wizard
+
+`./install.sh` không truyền subcommand sẽ chạy wizard: distro/suite, GPU, output/best
+mode, DNS hiện tại, dotfiles và app catalog. Mặc định chỉ in kế hoạch; `--yes` áp dụng
+dotfiles/display. Install Noctalia vẫn là lệnh `install` riêng vì cần quyền/VM.
+
+## 7. Dotfiles, hardware và app catalog
 
 - `dotfiles/manifest.toml` quản lý config cá nhân: Umbriel (keybinds + display include),
   Noctalia config/palette Catppuccin Mocha Sapphire, fcitx5-lotus, shell dotfiles.
