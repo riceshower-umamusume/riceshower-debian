@@ -1,6 +1,7 @@
 use anyhow::{Context, Result};
 use std::collections::BTreeMap;
 use std::fs;
+use std::path::PathBuf;
 
 pub fn parse_os_release(input: &str) -> BTreeMap<String, String> {
     let mut values = BTreeMap::new();
@@ -25,7 +26,53 @@ pub fn parse_os_release(input: &str) -> BTreeMap<String, String> {
 
 pub fn read_os_release() -> Result<BTreeMap<String, String>> {
     let content = fs::read_to_string("/etc/os-release").context("reading /etc/os-release")?;
-    Ok(parse_os_release(&content))
+    let mut values = parse_os_release(&content);
+    if let Some(suite) = installed_apt_suite() {
+        values.insert("DEBIAN_SUITE".to_string(), suite.to_string());
+    }
+    Ok(values)
+}
+
+fn installed_apt_suite() -> Option<&'static str> {
+    let mut paths = vec![PathBuf::from("/etc/apt/sources.list")];
+    if let Ok(entries) = fs::read_dir("/etc/apt/sources.list.d") {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if path
+                .extension()
+                .is_some_and(|ext| ext == "sources" || ext == "list")
+            {
+                paths.push(path);
+            }
+        }
+    }
+    let mut found = None;
+    for path in paths {
+        let Ok(content) = fs::read_to_string(path) else {
+            continue;
+        };
+        for line in content.lines().map(str::trim) {
+            if line.starts_with('#') {
+                continue;
+            }
+            let tokens: Vec<&str> = if let Some(rest) = line.strip_prefix("Suites:") {
+                rest.split_whitespace().collect()
+            } else if let Some(rest) = line.strip_prefix("deb ") {
+                rest.split_whitespace().skip(1).collect()
+            } else {
+                continue;
+            };
+            for token in tokens {
+                match token.to_ascii_lowercase().as_str() {
+                    "unstable" | "sid" => return Some("unstable"),
+                    "testing" | "forky" => found = Some("testing"),
+                    "stable" | "trixie" => found = found.or(Some("stable")),
+                    _ => {}
+                }
+            }
+        }
+    }
+    found
 }
 
 fn debian_suite(values: &BTreeMap<String, String>) -> &'static str {
@@ -35,6 +82,14 @@ fn debian_suite(values: &BTreeMap<String, String>) -> &'static str {
     let codename = values
         .get("VERSION_CODENAME")
         .map(|value| value.to_ascii_lowercase());
+    if let Some(suite) = values.get("DEBIAN_SUITE").map(|value| value.as_str()) {
+        return match suite {
+            "unstable" | "sid" => "debian-sid",
+            "testing" | "forky" => "debian-testing",
+            "stable" | "trixie" => "debian-stable",
+            _ => "debian",
+        };
+    }
     let pretty = values
         .get("PRETTY_NAME")
         .map(|value| value.to_ascii_lowercase())
@@ -117,6 +172,8 @@ mod tests {
         assert_eq!(detect_distro(&testing), "debian-testing");
         let sid = parse_os_release("ID=debian\nVERSION_ID=14\nVERSION_CODENAME=forky\nPRETTY_NAME=\"Debian GNU/Linux forky/sid\"\n");
         assert_eq!(detect_distro(&sid), "debian-sid");
+        let testing_apt = parse_os_release("ID=debian\nVERSION_ID=14\nVERSION_CODENAME=forky\nPRETTY_NAME=\"Debian GNU/Linux forky/sid\"\nDEBIAN_SUITE=testing\n");
+        assert_eq!(detect_distro(&testing_apt), "debian-testing");
     }
 
     #[test]
