@@ -382,12 +382,6 @@ fn validate_component_requirements(components: &BTreeMap<String, ComponentManife
                     component.id
                 );
             }
-            if requirement.pkg_config.is_empty() {
-                bail!(
-                    "component '{}' requirement '{key}' has no pkg-config module",
-                    component.id
-                );
-            }
             for module in &requirement.pkg_config {
                 validate_pkg_config_module(module)?;
             }
