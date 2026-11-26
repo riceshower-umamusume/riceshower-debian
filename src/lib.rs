@@ -3,6 +3,7 @@ mod atomic_file;
 pub mod build;
 pub mod cli;
 pub mod commands;
+mod deploy;
 pub mod distro;
 pub mod dotfiles;
 pub mod hardware;

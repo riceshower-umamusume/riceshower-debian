@@ -1,16 +1,23 @@
 use super::version::require_supported_version;
+use crate::build;
+use crate::deploy;
 use crate::manifest::{DistroManifest, Manifest};
 use crate::plan::resolve_install_plan;
 use crate::preflight;
+use crate::process::SudoRunner;
 use crate::process::SystemRunner;
+use crate::source;
 use crate::source::resolve_commit;
-use anyhow::{bail, Result};
+use crate::state;
+use anyhow::{bail, Context, Result};
 use std::collections::BTreeMap;
+use std::path::Path;
 
 pub(super) struct InstallOptions<'a> {
     pub requested: &'a [String],
     pub no_greeter: bool,
     pub latest: bool,
+    pub yes: bool,
 }
 
 pub(super) fn install_plan(
@@ -18,6 +25,7 @@ pub(super) fn install_plan(
     distro: &DistroManifest,
     os: &BTreeMap<String, String>,
     dry_run: bool,
+    dotfiles_dir: &Path,
     options: InstallOptions<'_>,
 ) -> Result<()> {
     if distro.family == "nixos" {
@@ -72,11 +80,59 @@ pub(super) fn install_plan(
         if report.has_blocking() {
             println!("dry-run: blocking preflight issues listed above; a real install would stop");
         }
+        println!("dry-run: would install packages, build 5 components and deploy to /usr/local, then apply dotfiles");
         println!("dry-run: no changes made");
-        Ok(())
-    } else if report.has_blocking() {
-        bail!("preflight failed; no packages or files were changed");
-    } else {
-        bail!("install engine is not implemented; resolved source references were not built or installed")
+        return Ok(());
     }
+    if !options.yes {
+        bail!("real install requires --yes; use --dry-run to inspect the plan");
+    }
+    if report.has_blocking() {
+        bail!("preflight failed; no packages or files were changed");
+    }
+
+    let sudo = SudoRunner::new(SystemRunner);
+    println!("installing host packages...");
+    deploy::install_packages(distro, &resolved.packages, &sudo)?;
+
+    let cache = source::cache_root()?;
+    let lock = manifest.lock()?;
+    let order = build::build_order(manifest, &resolved.components)?;
+    let mut components = Vec::new();
+    for id in order {
+        let component = manifest
+            .components
+            .get(&id)
+            .with_context(|| format!("component '{id}' disappeared"))?;
+        let commit = if options.latest {
+            resolve_commit(&component.repo, &component.git_ref)?
+        } else {
+            lock.components[id.as_str()].commit.clone()
+        };
+        println!("building {id} @ {commit}...");
+        let source_dir = source::acquire_component(component, &commit, &SystemRunner)?;
+        let outcome =
+            build::build_component(component, &commit, &source_dir, &cache, &SystemRunner)?;
+        components.push(deploy::DeployComponent {
+            id: outcome.component,
+            commit: outcome.commit,
+            staging_dir: outcome.staging_dir,
+            inventory: outcome.inventory,
+        });
+    }
+
+    println!("deploying to /usr/local...");
+    let writer = deploy::SudoWriter { runner: &sudo };
+    deploy::deploy_components(
+        Path::new("/"),
+        &components,
+        &resolved.packages,
+        &distro.id,
+        &state::state_path(),
+        &writer,
+        false,
+    )?;
+    super::config::config(dotfiles_dir, false)?;
+    println!("install complete");
+    Ok(())
 }

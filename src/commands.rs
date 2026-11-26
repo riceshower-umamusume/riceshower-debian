@@ -24,6 +24,7 @@ pub fn run(cli: Cli) -> Result<()> {
         dotfiles_dir,
         apps_dir,
         dry_run,
+        yes,
         command,
         ..
     } = cli;
@@ -57,10 +58,12 @@ pub fn run(cli: Cli) -> Result<()> {
                 distro,
                 &os,
                 dry_run,
+                &dotfiles_dir,
                 InstallOptions {
                     requested: &components,
                     no_greeter,
                     latest,
+                    yes,
                 },
             )
         }

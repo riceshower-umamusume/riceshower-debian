@@ -164,3 +164,58 @@ fn command_output(output: std::process::Output) -> CommandOutput {
         stderr: String::from_utf8_lossy(&output.stderr).into_owned(),
     }
 }
+
+pub struct SudoRunner<R> {
+    inner: R,
+    kitty: bool,
+}
+
+impl<R: Runner> SudoRunner<R> {
+    pub fn new(inner: R) -> Self {
+        Self {
+            inner,
+            kitty: std::env::var_os("KITTY_WINDOW_ID").is_some(),
+        }
+    }
+}
+
+impl<R: Runner> Runner for SudoRunner<R> {
+    fn run(&self, program: &str, args: &[&str]) -> Result<CommandOutput> {
+        let mut full = Vec::new();
+        if self.kitty {
+            full.extend(["kitty", "--wait", "-e", "sudo", "--", program]);
+        } else {
+            full.extend(["sudo", "--", program]);
+        }
+        full.extend(args);
+        self.inner.run(full[0], &full[1..])
+    }
+
+    fn run_with_stdin(&self, program: &str, args: &[&str], input: &str) -> Result<CommandOutput> {
+        let mut full = vec!["sudo", "--", program];
+        full.extend(args);
+        self.inner.run_with_stdin(full[0], &full[1..], input)
+    }
+
+    fn run_with_timeout(
+        &self,
+        program: &str,
+        args: &[&str],
+        timeout: Duration,
+    ) -> Result<CommandOutput> {
+        let mut full = vec!["sudo", "--", program];
+        full.extend(args);
+        self.inner.run_with_timeout(full[0], &full[1..], timeout)
+    }
+
+    fn run_streaming(
+        &self,
+        program: &str,
+        args: &[&str],
+        timeout: Duration,
+    ) -> Result<CommandOutput> {
+        let mut full = vec!["sudo", "--", program];
+        full.extend(args);
+        self.inner.run_streaming(full[0], &full[1..], timeout)
+    }
+}

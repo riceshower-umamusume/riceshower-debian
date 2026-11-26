@@ -10,7 +10,9 @@ Noctalia full-ecosystem installer for **Debian stable, testing and sid**, built 
 > an app catalog (fcitx5-lotus, Brave Origin Nightly), `install-app` apt installation
 > and GPU package recommendations. Deploy, the stable private-
 > dependency builder, the wizard, app installation, DNS/GPU profiles, greeter setup,
-> update/repair, uninstall and VM validation are still missing. This is not yet a
+> update/repair, uninstall and VM validation are still missing. The package/build/deploy
+> transaction is implemented and tested with a temp root, but has not been run against a
+> real `/usr/local` installation or a clean VM yet. This is not yet a
 > "clone and it installs everything" repo.
 
 ## Scope

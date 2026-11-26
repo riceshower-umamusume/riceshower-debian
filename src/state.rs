@@ -14,6 +14,8 @@ pub struct State {
     #[serde(default)]
     pub components: BTreeMap<String, InstalledComponent>,
     #[serde(default)]
+    pub packages: Vec<String>,
+    #[serde(default)]
     pub updated_at: Option<String>,
 }
 

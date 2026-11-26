@@ -43,9 +43,10 @@ Giai đoạn 4 — Stable private dependency builder
 
 ## Giai đoạn 5 — Deploy transaction
 
-- [ ] Backup/state/rollback; chỉ ghi `/usr/local` và `/opt/noctalia`.
-- [ ] Package manager idempotent; không tự thêm repo.
-- [ ] Dry-run transaction plan.
+- [x] Deploy writer cho `/usr/local`; inventory; file/symlink; backup/state/rollback.
+- [x] Package manager apt idempotent; không tự thêm repo.
+- [x] Unit test temp root; dry-run plan trong `install --dry-run`.
+- [ ] Chạy thật trên VM sạch /usr/local và kiểm tra session/greeter.
 
 ## Giai đoạn 6 — Wizard, `--yes`, greeter
 
