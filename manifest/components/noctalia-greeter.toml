@@ -1,0 +1,70 @@
+id = "noctalia-greeter"
+name = "Noctalia Greeter"
+repo = "https://github.com/noctalia-dev/noctalia-greeter"
+ref = "main"
+version_source = "meson.build"
+build_system = "meson"
+cxx_standard = 20
+build_tools = ["git", "meson", "ninja", "just", "cc", "cxx", "pkg-config", "wayland-scanner"]
+build_dependencies = ["wayland-client", "wayland-server", "wayland-protocols", "xkbcommon", "freetype", "fontconfig", "cairo", "pango", "librsvg", "libxml", "glib", "tomlplusplus", "nlohmann-json", "wlroots", "libinput", "webp", "libjxl", "epoxy"]
+runtime_dependencies = ["greetd"]
+artifacts = [
+  "bin/noctalia-greeter",
+  "bin/noctalia-greeter-session",
+  "share/polkit-1/actions/org.noctalia.greeter.apply-appearance.policy",
+]
+layer = "greeter"
+
+[build_requirements.wayland-client]
+pkg_config = ["wayland-client"]
+
+[build_requirements.wayland-server]
+pkg_config = ["wayland-server"]
+
+[build_requirements.wayland-protocols]
+pkg_config = ["wayland-protocols"]
+
+[build_requirements.xkbcommon]
+pkg_config = ["xkbcommon"]
+
+[build_requirements.freetype]
+pkg_config = ["freetype2"]
+
+[build_requirements.fontconfig]
+pkg_config = ["fontconfig"]
+
+[build_requirements.cairo]
+pkg_config = ["cairo", "cairo-ft"]
+
+[build_requirements.pango]
+pkg_config = ["pango", "pangocairo", "pangoft2"]
+
+[build_requirements.librsvg]
+pkg_config = ["librsvg-2.0"]
+
+[build_requirements.libxml]
+pkg_config = ["libxml-2.0"]
+
+[build_requirements.glib]
+pkg_config = ["glib-2.0", "gobject-2.0", "gio-2.0"]
+
+[build_requirements.tomlplusplus]
+pkg_config = ["tomlplusplus"]
+
+[build_requirements.nlohmann-json]
+pkg_config = ["nlohmann_json"]
+
+[build_requirements.wlroots]
+pkg_config = ["wlroots-0.20"]
+
+[build_requirements.libinput]
+pkg_config = ["libinput"]
+
+[build_requirements.webp]
+pkg_config = ["libwebp"]
+
+[build_requirements.libjxl]
+pkg_config = ["libjxl", "libjxl_threads"]
+
+[build_requirements.epoxy]
+pkg_config = ["epoxy"]

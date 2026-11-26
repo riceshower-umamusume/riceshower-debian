@@ -1,0 +1,22 @@
+schema = 1
+generated = "2026-11-25T19:45:00+07:00"
+
+[components.umbriel]
+commit = "a909081a934a80bb7685080884ffaaa30c857e4c"
+ref = "main"
+
+[components.noctalia]
+commit = "2dfc0b5b6343165dc77dcd378717b4d372f791a5"
+ref = "main"
+
+[components.xdg-desktop-portal-umbriel]
+commit = "cb5829efccfcf4816c20c0ca0c95b89867ffc908"
+ref = "main"
+
+[components.luciole]
+commit = "ea29c1c65eeb8c99495ebfe4c55ea6eb0a61612b"
+ref = "main"
+
+[components.noctalia-greeter]
+commit = "ec778fcba85ea07e94213939d11baabcd009817d"
+ref = "main"

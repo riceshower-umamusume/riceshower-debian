@@ -1,0 +1,89 @@
+id = "noctalia"
+name = "Noctalia Shell"
+repo = "https://github.com/noctalia-dev/noctalia"
+ref = "main"
+version_source = "VERSION"
+build_system = "meson"
+cxx_standard = 23
+build_tools = ["git", "meson", "ninja", "just", "cc", "cxx", "pkg-config", "wayland-scanner"]
+build_dependencies = ["sdbus-cpp", "wayland-client", "wayland-server", "wayland-protocols", "cairo", "pango", "xkbcommon", "glib", "libsecret", "libsodium", "polkit-agent", "polkit-gobject", "pipewire-dev", "wireplumber-dev", "curl", "qalculate", "libxml", "md4c", "nlohmann-json", "tomlplusplus", "libical", "webp", "sndfile"]
+build_options = ["-Dtests=disabled", "-Djemalloc=disabled"]
+runtime_dependencies = ["pipewire", "wireplumber"]
+artifacts = [
+  "bin/noctalia",
+  "libexec/noctalia/noctalia-pam-helper",
+  "share/noctalia/assets",
+]
+layer = "core"
+
+[build_requirements.sdbus-cpp]
+pkg_config = ["sdbus-c++"]
+
+[build_requirements.wayland-client]
+pkg_config = ["wayland-client"]
+
+[build_requirements.wayland-server]
+pkg_config = ["wayland-server"]
+
+[build_requirements.wayland-protocols]
+pkg_config = ["wayland-protocols"]
+
+[build_requirements.cairo]
+pkg_config = ["cairo"]
+
+[build_requirements.pango]
+pkg_config = ["pango", "pangocairo"]
+min_version = "1.50"
+
+[build_requirements.xkbcommon]
+pkg_config = ["xkbcommon"]
+
+[build_requirements.glib]
+pkg_config = ["glib-2.0", "gobject-2.0", "gio-2.0"]
+
+[build_requirements.libsecret]
+pkg_config = ["libsecret-1"]
+min_version = "0.20"
+
+[build_requirements.libsodium]
+pkg_config = ["libsodium"]
+min_version = "1.0.18"
+
+[build_requirements.polkit-agent]
+pkg_config = ["polkit-agent-1"]
+
+[build_requirements.polkit-gobject]
+pkg_config = ["polkit-gobject-1"]
+
+[build_requirements.pipewire-dev]
+pkg_config = ["libpipewire-0.3"]
+
+[build_requirements.wireplumber-dev]
+pkg_config = ["wireplumber-0.5"]
+
+[build_requirements.curl]
+pkg_config = ["libcurl"]
+
+[build_requirements.qalculate]
+pkg_config = ["libqalculate"]
+
+[build_requirements.libxml]
+pkg_config = ["libxml-2.0"]
+
+[build_requirements.md4c]
+pkg_config = ["md4c"]
+
+[build_requirements.nlohmann-json]
+pkg_config = ["nlohmann_json"]
+
+[build_requirements.tomlplusplus]
+pkg_config = ["tomlplusplus"]
+
+[build_requirements.libical]
+pkg_config = ["libical"]
+
+[build_requirements.webp]
+pkg_config = ["libwebp"]
+
+[build_requirements.sndfile]
+pkg_config = ["sndfile"]

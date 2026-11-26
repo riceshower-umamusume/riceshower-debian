@@ -1,0 +1,87 @@
+id = "luciole"
+name = "Luciole File Manager"
+repo = "https://github.com/noctalia-dev/luciole"
+ref = "main"
+version_source = "VERSION"
+build_system = "meson"
+cxx_standard = 23
+build_tools = ["git", "meson", "ninja", "just", "cc", "cxx", "pkg-config", "wayland-scanner"]
+build_dependencies = ["wayland-protocols", "glib", "curl", "libxml", "gdk-pixbuf", "tomlplusplus", "xkbcommon", "libarchive", "liblzma", "libacl", "libpng", "librsvg", "nlohmann-json", "wayland-client", "wayland-cursor", "cairo", "pango", "freetype", "fontconfig", "harfbuzz", "epoxy"]
+build_options = ["-Dtests=disabled"]
+runtime_dependencies = ["xdg-desktop-portal"]
+artifacts = [
+  "bin/luciole",
+  "share/applications/dev.noctalia.luciole.desktop",
+  "share/dbus-1/services/dev.noctalia.luciole.FileManager1.service",
+]
+layer = "optional"
+
+[build_requirements.wayland-protocols]
+pkg_config = ["wayland-protocols"]
+min_version = "1.49"
+
+[build_requirements.glib]
+pkg_config = ["glib-2.0", "gio-2.0", "gio-unix-2.0"]
+min_version = "2.76"
+
+[build_requirements.curl]
+pkg_config = ["libcurl"]
+min_version = "7.85"
+
+[build_requirements.libxml]
+pkg_config = ["libxml-2.0"]
+min_version = "2.9"
+
+[build_requirements.gdk-pixbuf]
+pkg_config = ["gdk-pixbuf-2.0"]
+min_version = "2.42"
+
+[build_requirements.tomlplusplus]
+pkg_config = ["tomlplusplus"]
+min_version = "3.4"
+
+[build_requirements.xkbcommon]
+pkg_config = ["xkbcommon"]
+
+[build_requirements.libarchive]
+pkg_config = ["libarchive"]
+
+[build_requirements.liblzma]
+pkg_config = ["liblzma"]
+
+[build_requirements.libacl]
+pkg_config = ["libacl"]
+
+[build_requirements.libpng]
+pkg_config = ["libpng"]
+
+[build_requirements.librsvg]
+pkg_config = ["librsvg-2.0"]
+
+[build_requirements.nlohmann-json]
+pkg_config = ["nlohmann_json"]
+
+[build_requirements.wayland-client]
+pkg_config = ["wayland-client", "wayland-egl"]
+
+[build_requirements.wayland-cursor]
+pkg_config = ["wayland-cursor"]
+
+[build_requirements.cairo]
+pkg_config = ["cairo", "cairo-ft"]
+
+[build_requirements.pango]
+pkg_config = ["pango", "pangocairo", "pangoft2"]
+min_version = "1.50"
+
+[build_requirements.freetype]
+pkg_config = ["freetype2"]
+
+[build_requirements.fontconfig]
+pkg_config = ["fontconfig"]
+
+[build_requirements.harfbuzz]
+pkg_config = ["harfbuzz"]
+
+[build_requirements.epoxy]
+pkg_config = ["epoxy"]

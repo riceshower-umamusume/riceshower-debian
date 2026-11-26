@@ -1,0 +1,89 @@
+id = "umbriel"
+name = "Umbriel"
+repo = "https://github.com/noctalia-dev/umbriel"
+ref = "main"
+version_source = "VERSION"
+build_system = "meson"
+cxx_standard = 23
+build_tools = ["git", "meson", "ninja", "just", "cc", "cxx", "pkg-config", "wayland-scanner"]
+build_dependencies = ["wayland-client", "wayland-server", "wayland-protocols", "wlroots", "xkbcommon", "libinput", "libei", "pixman", "tomlplusplus", "nlohmann-json", "cairo", "pango", "libdrm", "libdisplay-info", "xcb", "xcb-icccm", "xcb-ewmh", "xcb-shape", "xcb-randr", "xcb-render"]
+build_options = ["-Dtests=disabled"]
+component_dependencies = ["xdg-desktop-portal-umbriel"]
+runtime_dependencies = ["xwayland"]
+artifacts = [
+  "bin/umbriel",
+  "bin/start-umbriel",
+  "share/umbriel/config.toml",
+  "share/wayland-sessions/umbriel.desktop",
+]
+layer = "core"
+
+[build_requirements.wayland-client]
+pkg_config = ["wayland-client"]
+
+[build_requirements.wayland-server]
+pkg_config = ["wayland-server"]
+min_version = "1.24"
+
+[build_requirements.wayland-protocols]
+pkg_config = ["wayland-protocols"]
+min_version = "1.47"
+
+[build_requirements.wlroots]
+pkg_config = ["wlroots-0.20"]
+min_version = "0.20.1"
+max_version = "0.21.0"
+
+[build_requirements.xkbcommon]
+pkg_config = ["xkbcommon"]
+min_version = "1.10.0"
+
+[build_requirements.libinput]
+pkg_config = ["libinput"]
+min_version = "1.29"
+
+[build_requirements.libei]
+pkg_config = ["libeis-1.0"]
+min_version = "1.3"
+
+[build_requirements.pixman]
+pkg_config = ["pixman-1"]
+min_version = "0.43.0"
+
+[build_requirements.tomlplusplus]
+pkg_config = ["tomlplusplus"]
+
+[build_requirements.nlohmann-json]
+pkg_config = ["nlohmann_json"]
+
+[build_requirements.cairo]
+pkg_config = ["cairo"]
+
+[build_requirements.pango]
+pkg_config = ["pango", "pangocairo"]
+
+[build_requirements.libdrm]
+pkg_config = ["libdrm"]
+min_version = "2.4.129"
+
+[build_requirements.libdisplay-info]
+pkg_config = ["libdisplay-info"]
+min_version = "0.3.0"
+
+[build_requirements.xcb]
+pkg_config = ["xcb"]
+
+[build_requirements.xcb-icccm]
+pkg_config = ["xcb-icccm"]
+
+[build_requirements.xcb-ewmh]
+pkg_config = ["xcb-ewmh"]
+
+[build_requirements.xcb-shape]
+pkg_config = ["xcb-shape"]
+
+[build_requirements.xcb-randr]
+pkg_config = ["xcb-randr"]
+
+[build_requirements.xcb-render]
+pkg_config = ["xcb-render"]

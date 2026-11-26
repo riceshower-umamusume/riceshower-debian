@@ -1,0 +1,70 @@
+id = "debian-stable"
+name = "Debian stable"
+family = "debian"
+package_manager = "apt"
+private_dependencies = ["wlroots", "wayland-client", "wayland-server", "wayland-cursor", "wayland-protocols", "libinput", "xkbcommon", "pixman", "libdrm", "libdisplay-info", "libei", "sdbus-cpp", "wireplumber-dev", "wireplumber"]
+
+[[versions]]
+id = "13"
+codename = "trixie"
+tier = 1
+dep_layer = [
+  "wlroots 0.20",
+  "libdisplay-info 0.3",
+  "libinput 1.29",
+  "wayland-protocols 1.49",
+  "xkbcommon 1.10",
+  "libei 1.3",
+  "sdbus-c++ 2.x",
+  "wireplumber 0.5",
+]
+notes = "Stable 13/trixie; missing library floors are built into /opt/noctalia/deps and never overwrite system libraries."
+
+[package_map]
+greetd = "greetd"
+pipewire = "pipewire"
+xdg-desktop-portal = "xdg-desktop-portal"
+xwayland = "xwayland"
+cc = "gcc"
+cxx = "g++"
+git = "git"
+just = "just"
+meson = "meson"
+ninja = "ninja-build"
+pkg-config = "pkg-config"
+wayland-scanner = "libwayland-bin"
+tomlplusplus = "libtomlplusplus-dev"
+nlohmann-json = "nlohmann-json3-dev"
+cairo = "libcairo2-dev"
+pango = "libpango1.0-dev"
+xcb = "libxcb1-dev"
+xcb-icccm = "libxcb-icccm4-dev"
+xcb-ewmh = "libxcb-ewmh-dev"
+xcb-shape = "libxcb-shape0-dev"
+xcb-randr = "libxcb-randr0-dev"
+xcb-render = "libxcb-render0-dev"
+glib = "libglib2.0-dev"
+libsecret = "libsecret-1-dev"
+libsodium = "libsodium-dev"
+polkit-agent = "libpolkit-agent-1-dev"
+polkit-gobject = "libpolkit-gobject-1-dev"
+pipewire-dev = "libpipewire-0.3-dev"
+curl = "libcurl4-openssl-dev"
+qalculate = "libqalculate-dev"
+libxml = "libxml2-dev"
+md4c = "libmd4c-dev"
+libical = "libical-dev"
+webp = "libwebp-dev"
+sndfile = "libsndfile1-dev"
+gbm = "libgbm-dev"
+gdk-pixbuf = "libgdk-pixbuf-2.0-dev"
+libarchive = "libarchive-dev"
+liblzma = "liblzma-dev"
+libacl = "libacl1-dev"
+libpng = "libpng-dev"
+librsvg = "librsvg2-dev"
+freetype = "libfreetype-dev"
+fontconfig = "libfontconfig-dev"
+epoxy = "libepoxy-dev"
+harfbuzz = "libharfbuzz-dev"
+libjxl = "libjxl-dev"

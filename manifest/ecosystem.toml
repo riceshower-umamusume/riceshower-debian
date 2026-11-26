@@ -1,0 +1,13 @@
+schema = 1
+channel = "main"
+lockfile = "lock/ecosystem.lock.toml"
+
+components = [
+  "umbriel",
+  "noctalia",
+  "xdg-desktop-portal-umbriel",
+  "luciole",
+  "noctalia-greeter",
+]
+
+distros = ["debian-stable", "debian-testing", "debian-sid"]

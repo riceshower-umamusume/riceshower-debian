@@ -1,0 +1,73 @@
+id = "xdg-desktop-portal-umbriel"
+name = "Umbriel XDG Desktop Portal"
+repo = "https://github.com/noctalia-dev/xdg-desktop-portal-umbriel"
+ref = "main"
+version_source = "meson.build"
+build_system = "meson"
+cxx_standard = 23
+build_tools = ["git", "meson", "ninja", "just", "cc", "cxx", "pkg-config", "wayland-scanner"]
+build_dependencies = ["sdbus-cpp", "pipewire-dev", "wayland-client", "wayland-server", "wayland-protocols", "libdrm", "gbm", "cairo", "pango", "freetype", "fontconfig", "harfbuzz", "epoxy", "xkbcommon", "tomlplusplus", "nlohmann-json", "glib"]
+build_options = ["-Dtests=false"]
+component_dependencies = ["umbriel"]
+runtime_dependencies = ["xdg-desktop-portal"]
+artifacts = [
+  "libexec/xdg-desktop-portal-umbriel",
+  "libexec/umbriel-share-picker",
+  "share/xdg-desktop-portal/portals/umbriel.portal",
+  "share/xdg-desktop-portal/umbriel-portals.conf",
+]
+layer = "core"
+
+[build_requirements.sdbus-cpp]
+pkg_config = ["sdbus-c++"]
+min_version = "2.0"
+
+[build_requirements.pipewire-dev]
+pkg_config = ["libpipewire-0.3"]
+
+[build_requirements.wayland-client]
+pkg_config = ["wayland-client", "wayland-egl"]
+
+[build_requirements.wayland-server]
+pkg_config = ["wayland-server"]
+
+[build_requirements.wayland-protocols]
+pkg_config = ["wayland-protocols"]
+min_version = "1.39"
+
+[build_requirements.libdrm]
+pkg_config = ["libdrm"]
+
+[build_requirements.gbm]
+pkg_config = ["gbm"]
+
+[build_requirements.cairo]
+pkg_config = ["cairo", "cairo-ft"]
+
+[build_requirements.pango]
+pkg_config = ["pango", "pangocairo", "pangoft2"]
+min_version = "1.50"
+
+[build_requirements.freetype]
+pkg_config = ["freetype2"]
+
+[build_requirements.fontconfig]
+pkg_config = ["fontconfig"]
+
+[build_requirements.harfbuzz]
+pkg_config = ["harfbuzz"]
+
+[build_requirements.epoxy]
+pkg_config = ["epoxy"]
+
+[build_requirements.xkbcommon]
+pkg_config = ["xkbcommon"]
+
+[build_requirements.tomlplusplus]
+pkg_config = ["tomlplusplus"]
+
+[build_requirements.nlohmann-json]
+pkg_config = ["nlohmann_json"]
+
+[build_requirements.glib]
+pkg_config = ["glib-2.0"]
