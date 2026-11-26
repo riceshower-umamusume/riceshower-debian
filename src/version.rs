@@ -2,7 +2,20 @@ use anyhow::{bail, Context, Result};
 use std::cmp::Ordering;
 
 pub fn compare(left: &str, right: &str) -> Result<Ordering> {
-    Ok(parse(left)?.cmp(&parse(right)?))
+    Ok(parse_lenient(left)?.cmp(&parse_lenient(right)?))
+}
+
+// pkg-config versions can carry suffixes such as 8.24.0-rc2 or 1.0~rc1.
+fn parse_lenient(value: &str) -> Result<Vec<u64>> {
+    let numeric: String = value
+        .chars()
+        .take_while(|character| character.is_ascii_digit() || *character == '.')
+        .collect();
+    let numeric = numeric.trim_end_matches('.');
+    if numeric.is_empty() {
+        bail!("invalid numeric version '{value}'");
+    }
+    parse(numeric)
 }
 
 pub fn parse(value: &str) -> Result<Vec<u64>> {
@@ -40,5 +53,16 @@ mod tests {
         assert!(parse("1..2").is_err());
         assert!(parse("1.2rc1").is_err());
         assert!(parse("1.2.3-1").is_err());
+    }
+}
+
+#[cfg(test)]
+mod lenient_tests {
+    use super::*;
+
+    #[test]
+    fn compare_accepts_package_suffixes() {
+        assert_eq!(compare("8.24.0-rc2", "7.85").unwrap(), Ordering::Greater);
+        assert_eq!(compare("1.0~rc1", "1.0").unwrap(), Ordering::Equal);
     }
 }

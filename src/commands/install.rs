@@ -87,13 +87,15 @@ pub(super) fn install_plan(
     if !options.yes {
         bail!("real install requires --yes; use --dry-run to inspect the plan");
     }
-    if report.has_blocking() {
-        bail!("preflight failed; no packages or files were changed");
-    }
 
     let sudo = SudoRunner::new(SystemRunner);
     println!("installing host packages...");
     deploy::install_packages(distro, &resolved.packages, &sudo)?;
+    let report = preflight::check(manifest, distro, &resolved.components, &SystemRunner)?;
+    report.print();
+    if report.has_blocking() {
+        bail!("preflight still failing after package installation; no files were deployed");
+    }
 
     let cache = source::cache_root()?;
     let lock = manifest.lock()?;
