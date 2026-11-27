@@ -13,14 +13,16 @@ pub const PREFIX: &str = "/opt/noctalia/deps";
 
 pub fn environment() -> Vec<(String, String)> {
     let lib = format!("{PREFIX}/lib");
+    let lib64 = format!("{PREFIX}/lib64");
     let lib_arch = format!("{PREFIX}/lib/x86_64-linux-gnu");
     let pkg_config = [
         format!("{lib}/pkgconfig"),
+        format!("{lib64}/pkgconfig"),
         format!("{lib_arch}/pkgconfig"),
         format!("{PREFIX}/share/pkgconfig"),
     ]
     .join(":");
-    let library_path = format!("{lib}:{lib_arch}");
+    let library_path = format!("{lib}:{lib64}:{lib_arch}");
     let path = match env::var("PATH") {
         Ok(current) if !current.is_empty() => format!("{PREFIX}/bin:{current}"),
         _ => format!("{PREFIX}/bin"),
