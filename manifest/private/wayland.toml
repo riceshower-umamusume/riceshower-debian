@@ -1,6 +1,6 @@
 id = "wayland"
 name = "Wayland"
 repo = "https://gitlab.freedesktop.org/wayland/wayland.git"
-ref = "736d12ac67c20c60dc406dc49bb06be878501f86"
+ref = "3e673a438b0a9749e3bdf5cac4befac86333024c"
 build_system = "meson"
 build_options = ["-Ddocumentation=false", "-Dtests=false"]
