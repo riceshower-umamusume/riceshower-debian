@@ -6,6 +6,11 @@ source = "umbriel/config.toml"
 target = ".config/umbriel/config.toml"
 
 [[files]]
+id = "umbriel-display"
+source = "umbriel/display.toml"
+target = ".config/umbriel/display.toml"
+
+[[files]]
 id = "noctalia-config"
 source = "noctalia/config.toml"
 target = ".config/noctalia/config.toml"
