@@ -4,4 +4,4 @@ repo = "https://gitlab.freedesktop.org/wlroots/wlroots.git"
 ref = "a7f20066270c042799ae70b71dfa4d561ba85121"
 build_system = "meson"
 build_component_dependencies = ["wayland", "wayland-protocols", "xkbcommon", "pixman", "libdrm", "libdisplay-info", "libei", "libinput"]
-build_options = ["-Dexamples=false", "-Dxwayland=disabled"]
+build_options = ["-Dexamples=false"]
