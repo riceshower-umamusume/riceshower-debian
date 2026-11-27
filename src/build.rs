@@ -110,6 +110,8 @@ pub fn build_component(
         run_meson(runner, &install, "meson install", env)?;
     } else {
         let mut setup = vec![
+            "-G".to_string(),
+            "Ninja".to_string(),
             "-S".to_string(),
             path_string(source_dir)?,
             "-B".to_string(),
