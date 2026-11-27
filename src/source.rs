@@ -265,7 +265,7 @@ fn verify_checkout(runner: &dyn Runner, path: &Path, commit: &str) -> Result<()>
 
     let status = runner.run_with_timeout(
         "git",
-        &["-C", path, "status", "--porcelain"],
+        &["-C", path, "status", "--porcelain", "--untracked-files=no"],
         Duration::from_secs(30),
     )?;
     if !status.success {
