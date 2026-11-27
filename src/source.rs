@@ -265,7 +265,7 @@ fn verify_checkout(runner: &dyn Runner, path: &Path, commit: &str) -> Result<()>
 
     let status = runner.run_with_timeout(
         "git",
-        &["-C", path, "status", "--porcelain", "--untracked-files=no"],
+        &["-C", path, "status", "--porcelain"],
         Duration::from_secs(30),
     )?;
     if !status.success {
@@ -274,8 +274,27 @@ fn verify_checkout(runner: &dyn Runner, path: &Path, commit: &str) -> Result<()>
             status.stderr.trim()
         );
     }
-    if !status.stdout.trim().is_empty() {
-        bail!("source cache {path} has local changes");
+    let ignored_generated = |entry: &str| {
+        let path = entry
+            .get(3..)
+            .unwrap_or_default()
+            .trim()
+            .trim_end_matches('/');
+        path.ends_with("/__pycache__")
+            || path == "__pycache__"
+            || path.ends_with("/.pytest_cache")
+            || path == ".pytest_cache"
+    };
+    let dirty: Vec<&str> = status
+        .stdout
+        .lines()
+        .filter(|line| !line.is_empty() && !ignored_generated(line))
+        .collect();
+    if !dirty.is_empty() {
+        bail!(
+            "source cache {path} has local changes: {}",
+            dirty.join(", ")
+        );
     }
     Ok(())
 }
