@@ -1,0 +1,6 @@
+id = "libdisplay-info"
+name = "libdisplay-info"
+repo = "https://gitlab.freedesktop.org/emersion/libdisplay-info.git"
+ref = "47a5590e9c4eb35d67651b8c05a55f1a48259329"
+build_system = "meson"
+build_options = ["-Dtests=false"]

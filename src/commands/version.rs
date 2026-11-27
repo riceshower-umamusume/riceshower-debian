@@ -91,6 +91,7 @@ mod tests {
             versions,
             package_map: BTreeMap::new(),
             private_dependencies: Vec::new(),
+            private_build_packages: Vec::new(),
         }
     }
 

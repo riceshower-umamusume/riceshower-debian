@@ -3,6 +3,7 @@ name = "Debian stable"
 family = "debian"
 package_manager = "apt"
 private_dependencies = ["wlroots", "wayland-client", "wayland-server", "wayland-cursor", "wayland-protocols", "libinput", "xkbcommon", "pixman", "libdrm", "libdisplay-info", "libei", "sdbus-cpp", "wireplumber-dev", "wireplumber"]
+private_build_packages = ["cmake", "libexpat1-dev", "libffi-dev", "libevdev-dev", "libmtdev-dev", "libudev-dev", "libsystemd-dev", "libpciaccess-dev", "hwdata", "libspa-0.2-dev", "libdbus-1-dev", "libcap-dev"]
 
 [[versions]]
 id = "13"

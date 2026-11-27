@@ -4,6 +4,7 @@ use crate::deploy;
 use crate::manifest::{DistroManifest, Manifest};
 use crate::plan::resolve_install_plan;
 use crate::preflight;
+use crate::private;
 use crate::process::SudoRunner;
 use crate::process::SystemRunner;
 use crate::source;
@@ -89,8 +90,12 @@ pub(super) fn install_plan(
     }
 
     let sudo = SudoRunner::new(SystemRunner);
+    let mut packages = resolved.packages.clone();
+    packages.extend(distro.private_build_packages.iter().cloned());
+    packages.sort();
+    packages.dedup();
     println!("installing host packages...");
-    deploy::install_packages(distro, &resolved.packages, &sudo)?;
+    deploy::install_packages(distro, &packages, &sudo)?;
     let report = preflight::check(manifest, distro, &resolved.components, &SystemRunner)?;
     report.print();
     if report.has_blocking() {
@@ -98,6 +103,14 @@ pub(super) fn install_plan(
     }
 
     let cache = source::cache_root()?;
+    let private_env = if resolved.private_dependencies.is_empty() {
+        Vec::new()
+    } else {
+        private::environment()
+    };
+    if !resolved.private_dependencies.is_empty() {
+        private::build_all(manifest, &cache, &sudo)?;
+    }
     let lock = manifest.lock()?;
     let order = build::build_order(manifest, &resolved.components)?;
     let mut components = Vec::new();
@@ -113,8 +126,15 @@ pub(super) fn install_plan(
         };
         println!("building {id} @ {commit}...");
         let source_dir = source::acquire_component(component, &commit, &SystemRunner)?;
-        let outcome =
-            build::build_component(component, &commit, &source_dir, &cache, &SystemRunner)?;
+        let outcome = build::build_component(
+            component,
+            &commit,
+            &source_dir,
+            &cache,
+            build::SYSTEM_PREFIX,
+            &private_env,
+            &SystemRunner,
+        )?;
         components.push(deploy::DeployComponent {
             id: outcome.component,
             commit: outcome.commit,
@@ -128,7 +148,7 @@ pub(super) fn install_plan(
     deploy::deploy_components(
         Path::new("/"),
         &components,
-        &resolved.packages,
+        &packages,
         &distro.id,
         &state::state_path(),
         &writer,

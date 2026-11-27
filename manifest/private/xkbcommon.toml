@@ -1,0 +1,6 @@
+id = "xkbcommon"
+name = "libxkbcommon"
+repo = "https://github.com/xkbcommon/libxkbcommon.git"
+ref = "7888474d0296dcad50c9ba4adfdfdf2be02d35e1"
+build_system = "meson"
+build_options = ["-Denable-x11=false", "-Denable-wayland=false", "-Denable-docs=false", "-Denable-tools=false"]

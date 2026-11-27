@@ -450,6 +450,7 @@ mod tests {
             versions: Vec::new(),
             package_map: Default::default(),
             private_dependencies: Vec::new(),
+            private_build_packages: Vec::new(),
         };
         install_packages(&distro, &["pkg".to_string()], &FakePackages).unwrap();
     }

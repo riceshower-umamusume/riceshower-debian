@@ -1,0 +1,5 @@
+id = "sdbus-cpp"
+name = "sdbus-c++"
+repo = "https://github.com/Kistler-Group/sdbus-cpp.git"
+ref = "ca073434d2c03c2b619f7e23f285cebbf32c7e46"
+build_system = "cmake"

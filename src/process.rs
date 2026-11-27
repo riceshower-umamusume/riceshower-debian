@@ -32,6 +32,16 @@ pub trait Runner {
     ) -> Result<CommandOutput> {
         self.run(program, args)
     }
+
+    fn run_streaming_env(
+        &self,
+        program: &str,
+        args: &[&str],
+        _env: &[(String, String)],
+        timeout: Duration,
+    ) -> Result<CommandOutput> {
+        self.run_streaming(program, args, timeout)
+    }
 }
 
 pub struct SystemRunner;
@@ -111,9 +121,20 @@ impl Runner for SystemRunner {
         args: &[&str],
         timeout: Duration,
     ) -> Result<CommandOutput> {
+        self.run_streaming_env(program, args, &[], timeout)
+    }
+
+    fn run_streaming_env(
+        &self,
+        program: &str,
+        args: &[&str],
+        env: &[(String, String)],
+        timeout: Duration,
+    ) -> Result<CommandOutput> {
         let mut command = Command::new(program);
         command
             .args(args)
+            .envs(env.iter().map(|(key, value)| (key, value)))
             .stdout(Stdio::inherit())
             .stderr(Stdio::inherit());
         #[cfg(unix)]

@@ -56,9 +56,11 @@ pub fn build_component(
     commit: &str,
     source_dir: &Path,
     cache_root: &Path,
+    prefix: &str,
+    env: &[(String, String)],
     runner: &dyn Runner,
 ) -> Result<BuildOutcome> {
-    if component.build_system != "meson" {
+    if !matches!(component.build_system.as_str(), "meson" | "cmake") {
         bail!(
             "component '{}' uses unsupported build system '{}'",
             component.id,
@@ -69,6 +71,7 @@ pub fn build_component(
     validate_commit(commit)?;
     validate_build_options(&component.build_options)?;
     validate_artifacts(&component.artifacts)?;
+    validate_prefix(prefix)?;
     if !source_dir.is_dir() {
         bail!("source directory {} does not exist", source_dir.display());
     }
@@ -78,40 +81,71 @@ pub fn build_component(
     reset_dir(&build_dir)?;
     reset_dir(&staging_dir)?;
 
-    let setup = meson_setup_args(
-        &build_dir,
-        source_dir,
-        &component.build_options,
-        SYSTEM_PREFIX,
-    )?;
-    run_meson(runner, &setup, "meson setup")?;
+    if component.build_system == "meson" {
+        let setup = meson_setup_args(&build_dir, source_dir, &component.build_options, prefix)?;
+        run_meson(runner, &setup, "meson setup", env)?;
 
-    let compile = vec![
-        "compile".to_string(),
-        "-C".to_string(),
-        path_string(&build_dir)?,
-    ];
-    run_meson(runner, &compile, "meson compile")?;
+        let compile = vec![
+            "compile".to_string(),
+            "-C".to_string(),
+            path_string(&build_dir)?,
+        ];
+        run_meson(runner, &compile, "meson compile", env)?;
 
-    let tests = vec![
-        "test".to_string(),
-        "-C".to_string(),
-        path_string(&build_dir)?,
-        "--print-errorlogs".to_string(),
-    ];
-    run_meson(runner, &tests, "meson test")?;
+        let tests = vec![
+            "test".to_string(),
+            "-C".to_string(),
+            path_string(&build_dir)?,
+            "--print-errorlogs".to_string(),
+        ];
+        run_meson(runner, &tests, "meson test", env)?;
 
-    let install = vec![
-        "install".to_string(),
-        "-C".to_string(),
-        path_string(&build_dir)?,
-        "--destdir".to_string(),
-        path_string(&staging_dir)?,
-    ];
-    run_meson(runner, &install, "meson install")?;
+        let install = vec![
+            "install".to_string(),
+            "-C".to_string(),
+            path_string(&build_dir)?,
+            "--destdir".to_string(),
+            path_string(&staging_dir)?,
+        ];
+        run_meson(runner, &install, "meson install", env)?;
+    } else {
+        let mut setup = vec![
+            "-S".to_string(),
+            path_string(source_dir)?,
+            "-B".to_string(),
+            path_string(&build_dir)?,
+            format!("-DCMAKE_INSTALL_PREFIX={prefix}"),
+            "-DCMAKE_BUILD_TYPE=Release".to_string(),
+        ];
+        setup.extend(component.build_options.iter().cloned());
+        run_program(runner, "cmake", &setup, "cmake setup", env)?;
+        run_program(
+            runner,
+            "cmake",
+            &[
+                "--build".to_string(),
+                path_string(&build_dir)?,
+                "--parallel".to_string(),
+            ],
+            "cmake build",
+            env,
+        )?;
+        run_program(
+            runner,
+            "cmake",
+            &[
+                "--install".to_string(),
+                path_string(&build_dir)?,
+                "--prefix".to_string(),
+                path_string(&staging_dir.join(prefix.trim_start_matches('/')))?,
+            ],
+            "cmake install",
+            env,
+        )?;
+    }
 
-    validate_declared_artifacts(component, &staging_dir, SYSTEM_PREFIX)?;
-    let inventory = inventory_for(&component.id, commit, &staging_dir, SYSTEM_PREFIX)?;
+    validate_declared_artifacts(component, &staging_dir, prefix)?;
+    let inventory = inventory_for(&component.id, commit, &staging_dir, prefix)?;
     let inventory_path = cache_root
         .join("inventory")
         .join(&component.id)
@@ -130,16 +164,23 @@ pub fn build_component(
 }
 
 pub fn build_order(manifest: &Manifest, selected: &[String]) -> Result<Vec<String>> {
+    build_order_components(&manifest.components, selected)
+}
+
+pub fn build_order_components(
+    components: &BTreeMap<String, ComponentManifest>,
+    selected: &[String],
+) -> Result<Vec<String>> {
     let mut states: BTreeMap<String, u8> = BTreeMap::new();
     let mut order = Vec::new();
     for id in selected {
-        visit_build_component(manifest, selected, id, &mut states, &mut order)?;
+        visit_build_component(components, selected, id, &mut states, &mut order)?;
     }
     Ok(order)
 }
 
 fn visit_build_component(
-    manifest: &Manifest,
+    components: &BTreeMap<String, ComponentManifest>,
     selected: &[String],
     id: &str,
     states: &mut BTreeMap<String, u8>,
@@ -150,8 +191,7 @@ fn visit_build_component(
         Some(1) => bail!("cycle in build component dependencies at '{id}'"),
         _ => {}
     }
-    let component = manifest
-        .components
+    let component = components
         .get(id)
         .with_context(|| format!("component '{id}' disappeared from the manifest"))?;
     states.insert(id.to_string(), 1);
@@ -159,7 +199,7 @@ fn visit_build_component(
         if !selected.iter().any(|candidate| candidate == dependency) {
             bail!("build component dependency '{dependency}' of '{id}' is not selected");
         }
-        visit_build_component(manifest, selected, dependency, states, order)?;
+        visit_build_component(components, selected, dependency, states, order)?;
     }
     states.insert(id.to_string(), 2);
     order.push(id.to_string());
@@ -329,9 +369,24 @@ fn write_inventory(path: &Path, inventory: &StagingInventory) -> Result<()> {
         .with_context(|| format!("writing inventory {}", path.display()))
 }
 
-fn run_meson(runner: &dyn Runner, args: &[String], action: &str) -> Result<()> {
+fn run_meson(
+    runner: &dyn Runner,
+    args: &[String],
+    action: &str,
+    env: &[(String, String)],
+) -> Result<()> {
+    run_program(runner, "meson", args, action, env)
+}
+
+fn run_program(
+    runner: &dyn Runner,
+    program: &str,
+    args: &[String],
+    action: &str,
+    env: &[(String, String)],
+) -> Result<()> {
     let arguments: Vec<&str> = args.iter().map(String::as_str).collect();
-    let output = runner.run_streaming("meson", &arguments, BUILD_TIMEOUT)?;
+    let output = runner.run_streaming_env(program, &arguments, env, BUILD_TIMEOUT)?;
     if !output.success {
         let details = if output.stderr.trim().is_empty() {
             output.stdout.trim()
@@ -578,6 +633,8 @@ mod tests {
             &"a".repeat(40),
             &source,
             &cache,
+            SYSTEM_PREFIX,
+            &[],
             &FakeMeson {
                 artifacts: component.artifacts.clone(),
             },
@@ -607,9 +664,16 @@ mod tests {
         fs::write(source.join("marker"), "source").unwrap();
         let cache = directory.path().join("cache");
 
-        assert!(
-            build_component(&component, &"b".repeat(40), &source, &cache, &FailingMeson,).is_err()
-        );
+        assert!(build_component(
+            &component,
+            &"b".repeat(40),
+            &source,
+            &cache,
+            SYSTEM_PREFIX,
+            &[],
+            &FailingMeson,
+        )
+        .is_err());
         assert_eq!(fs::read_to_string(source.join("marker")).unwrap(), "source");
         assert!(!cache
             .join("staging/umbriel")

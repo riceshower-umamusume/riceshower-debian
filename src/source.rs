@@ -40,24 +40,25 @@ pub fn resolve_commit(repository: &str, git_ref: &str) -> Result<String> {
 }
 
 fn validate_github_repository(repository: &str) -> Result<()> {
-    let path = repository
-        .strip_prefix("https://github.com/")
-        .context("component repository must use an https://github.com/ URL")?;
+    let rest = repository
+        .strip_prefix("https://")
+        .context("component repository must use an https:// URL")?;
+    let (host, path) = rest
+        .split_once('/')
+        .with_context(|| format!("invalid repository URL: {repository}"))?;
+    if !matches!(host, "github.com" | "gitlab.freedesktop.org") {
+        bail!("unsupported component repository host: {host}");
+    }
     let path = path.strip_suffix(".git").unwrap_or(path);
-    let mut parts = path.split('/');
-    let owner = parts.next().unwrap_or_default();
-    let name = parts.next().unwrap_or_default();
     let valid_segment = |value: &str| {
         !value.is_empty()
             && value.bytes().all(|byte| {
-                byte.is_ascii_alphanumeric() || byte == b'-' || byte == b'_' || byte == b'.'
+                byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.' | b'/')
             })
-            && value != "."
-            && value != ".."
+            && !value.split('/').any(|part| part == "." || part == "..")
     };
-
-    if !valid_segment(owner) || !valid_segment(name) || parts.next().is_some() {
-        bail!("invalid GitHub repository URL: {repository}");
+    if path.split('/').count() != 2 || !valid_segment(path) {
+        bail!("invalid repository URL: {repository}");
     }
     Ok(())
 }

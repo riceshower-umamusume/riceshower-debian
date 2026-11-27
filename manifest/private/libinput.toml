@@ -1,0 +1,7 @@
+id = "libinput"
+name = "libinput"
+repo = "https://gitlab.freedesktop.org/libinput/libinput.git"
+ref = "936cee224267a7d21c87c06203cd866c1572df20"
+build_system = "meson"
+build_component_dependencies = ["wayland", "xkbcommon"]
+build_options = ["-Dtests=false", "-Ddebug-gui=false", "-Ddocumentation=false"]

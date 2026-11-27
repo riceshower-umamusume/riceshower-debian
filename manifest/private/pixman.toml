@@ -1,0 +1,6 @@
+id = "pixman"
+name = "Pixman"
+repo = "https://gitlab.freedesktop.org/pixman/pixman.git"
+ref = "9cc163c9da0fb4da430641715313d95a6ec466d9"
+build_system = "meson"
+build_options = ["-Dtests=disabled", "-Ddemos=disabled", "-Dgtk=disabled"]

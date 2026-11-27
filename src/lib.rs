@@ -10,6 +10,7 @@ pub mod hardware;
 pub mod manifest;
 mod plan;
 mod preflight;
+mod private;
 pub mod process;
 pub mod source;
 pub mod state;

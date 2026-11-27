@@ -73,6 +73,8 @@ pub struct DistroManifest {
     pub package_map: BTreeMap<String, String>,
     #[serde(default)]
     pub private_dependencies: Vec<String>,
+    #[serde(default)]
+    pub private_build_packages: Vec<String>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -110,6 +112,32 @@ pub struct Manifest {
     pub ecosystem: EcosystemManifest,
     pub components: BTreeMap<String, ComponentManifest>,
     pub distros: BTreeMap<String, DistroManifest>,
+}
+
+pub fn load_private(root: &Path) -> Result<BTreeMap<String, ComponentManifest>> {
+    let directory = root.join("private");
+    let mut components = BTreeMap::new();
+    let mut paths: Vec<PathBuf> = fs::read_dir(&directory)
+        .with_context(|| format!("reading {}", directory.display()))?
+        .flatten()
+        .map(|entry| entry.path())
+        .filter(|path| path.extension().is_some_and(|ext| ext == "toml"))
+        .collect();
+    paths.sort();
+    for path in paths {
+        let component: ComponentManifest = read_toml(&path)?;
+        if !matches!(component.build_system.as_str(), "meson" | "cmake") {
+            bail!(
+                "private component '{}' uses unsupported build system '{}'",
+                component.id,
+                component.build_system
+            );
+        }
+        if components.insert(component.id.clone(), component).is_some() {
+            bail!("duplicate private component id in {}", directory.display());
+        }
+    }
+    Ok(components)
 }
 
 pub fn load(root: &Path) -> Result<Manifest> {
@@ -450,6 +478,20 @@ mod tests {
         assert_eq!(manifest.ecosystem.channel, "main");
         assert!(manifest.components.contains_key("umbriel"));
         assert_eq!(manifest.distros["debian-stable"].versions[0].tier, 1);
+    }
+
+    #[test]
+    fn private_manifest_loads_in_dependency_order() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("manifest");
+        let private = load_private(&root).unwrap();
+        assert_eq!(private.len(), 11);
+        assert_eq!(private["wlroots"].build_system, "meson");
+        let ids: Vec<String> = private.keys().cloned().collect();
+        let order = crate::build::build_order_components(&private, &ids).unwrap();
+        let position = |id: &str| order.iter().position(|item| item == id).unwrap();
+        assert!(position("wayland") < position("wlroots"));
+        assert!(position("libinput") < position("wlroots"));
+        assert!(position("sdbus-cpp") < position("wireplumber"));
     }
 
     #[test]

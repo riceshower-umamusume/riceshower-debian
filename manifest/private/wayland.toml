@@ -1,0 +1,6 @@
+id = "wayland"
+name = "Wayland"
+repo = "https://gitlab.freedesktop.org/wayland/wayland.git"
+ref = "736d12ac67c20c60dc406dc49bb06be878501f86"
+build_system = "meson"
+build_options = ["-Ddocumentation=false", "-Dtests=false"]

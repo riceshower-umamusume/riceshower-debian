@@ -30,7 +30,15 @@ pub(super) fn build_component(
     }
 
     let source_dir = source::acquire_component(component, &commit, &SystemRunner)?;
-    let outcome = build::build_component(component, &commit, &source_dir, &cache, &SystemRunner)?;
+    let outcome = build::build_component(
+        component,
+        &commit,
+        &source_dir,
+        &cache,
+        build::SYSTEM_PREFIX,
+        &[],
+        &SystemRunner,
+    )?;
     println!("source: {}", outcome.source_dir.display());
     println!("staging: {}", outcome.staging_dir.display());
     println!(

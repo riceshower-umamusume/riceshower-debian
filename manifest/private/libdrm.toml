@@ -1,0 +1,6 @@
+id = "libdrm"
+name = "libdrm"
+repo = "https://gitlab.freedesktop.org/mesa/drm.git"
+ref = "a8e5e10a873f67f557dc70e5407af4553f35edd9"
+build_system = "meson"
+build_options = ["-Dtests=false"]

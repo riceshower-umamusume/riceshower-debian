@@ -1,0 +1,6 @@
+id = "wayland-protocols"
+name = "Wayland protocols"
+repo = "https://gitlab.freedesktop.org/wayland/wayland-protocols.git"
+ref = "ee78491a237eaff9389a0ccf8680521d074407d3"
+build_system = "meson"
+build_options = ["-Dtests=false"]
