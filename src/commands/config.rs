@@ -1,3 +1,4 @@
+use crate::dns;
 use crate::dotfiles;
 use crate::hardware;
 use crate::process::SystemRunner;
@@ -22,6 +23,7 @@ pub(super) fn config(dotfiles_dir: &Path, dry_run: bool) -> Result<()> {
     } else {
         dotfiles::write_display(home, &display, dry_run)?;
     }
+    dns::apply(&crate::process::SudoRunner::new(SystemRunner), dry_run)?;
     Ok(())
 }
 

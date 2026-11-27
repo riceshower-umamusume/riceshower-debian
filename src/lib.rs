@@ -5,6 +5,7 @@ pub mod cli;
 pub mod commands;
 mod deploy;
 pub mod distro;
+pub mod dns;
 pub mod dotfiles;
 pub mod hardware;
 pub mod manifest;

@@ -1,0 +1,61 @@
+use crate::process::Runner;
+use anyhow::{Context, Result};
+use std::fs;
+use std::path::Path;
+
+const DROP_IN: &str = "/etc/systemd/resolved.conf.d/90-riceshower-debian.conf";
+
+pub fn nameservers() -> Vec<String> {
+    let content = fs::read_to_string("/etc/resolv.conf").unwrap_or_default();
+    content
+        .lines()
+        .filter_map(|line| {
+            line.trim()
+                .strip_prefix("nameserver ")
+                .map(str::trim)
+                .filter(|value| !value.is_empty())
+                .map(str::to_string)
+        })
+        .collect()
+}
+
+pub fn apply(runner: &dyn Runner, dry_run: bool) -> Result<()> {
+    let servers = nameservers();
+    if servers.is_empty() {
+        println!("dns: no nameservers found; skipped");
+        return Ok(());
+    }
+    let body = format!(
+        "# Managed by riceshower-debian\n[Resolve]\nDNS={}\n",
+        servers.join(" ")
+    );
+    if dry_run {
+        println!("dns: would write {DROP_IN} with {}", servers.join(", "));
+        return Ok(());
+    }
+    if let Some(parent) = Path::new(DROP_IN).parent() {
+        let output = runner.run("mkdir", &["-p", &parent.display().to_string()])?;
+        if !output.success {
+            anyhow::bail!(
+                "creating {} failed: {}",
+                parent.display(),
+                output.stderr.trim()
+            );
+        }
+    }
+    let temporary = format!("{DROP_IN}.tmp");
+    let output = runner.run_with_stdin("tee", &[temporary.as_str()], &body)?;
+    if !output.success {
+        anyhow::bail!("writing {temporary} failed: {}", output.stderr.trim());
+    }
+    let output = runner.run("mv", &[temporary.as_str(), DROP_IN])?;
+    if !output.success {
+        anyhow::bail!("installing {DROP_IN} failed: {}", output.stderr.trim());
+    }
+    println!("dns: {DROP_IN} -> {}", servers.join(", "));
+    Ok(())
+}
+
+pub fn read_systemd() -> Result<String> {
+    fs::read_to_string(DROP_IN).with_context(|| format!("reading {DROP_IN}"))
+}
