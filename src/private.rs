@@ -32,6 +32,10 @@ pub fn environment() -> Vec<(String, String)> {
         ("LD_LIBRARY_PATH".to_string(), library_path),
         ("PATH".to_string(), path),
         ("CMAKE_PREFIX_PATH".to_string(), PREFIX.to_string()),
+        (
+            "LDFLAGS".to_string(),
+            format!("-Wl,-rpath,{PREFIX}/lib64:{PREFIX}/lib"),
+        ),
     ]
 }
 
