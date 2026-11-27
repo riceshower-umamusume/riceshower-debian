@@ -39,7 +39,7 @@ pub enum Command {
         #[arg(long, value_delimiter = ',')]
         components: Vec<String>,
         #[arg(long)]
-        no_greeter: bool,
+        greeter: bool,
         #[arg(long)]
         latest: bool,
     },

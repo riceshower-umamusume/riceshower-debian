@@ -49,7 +49,7 @@ pub(super) fn install_plan(
     println!("  channel: {}", manifest.ecosystem.channel);
     println!("  latest: {}", options.latest);
     if options.no_greeter {
-        println!("  greeter: skipped (--no-greeter)");
+        println!("  greeter: skipped (opt-in with --greeter)");
     }
     let lock = manifest.lock()?;
     println!("  components:");

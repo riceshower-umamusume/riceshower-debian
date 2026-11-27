@@ -74,7 +74,7 @@ pub(super) fn wizard(
                 dotfiles_dir,
                 super::install::InstallOptions {
                     requested: &[],
-                    no_greeter: false,
+                    no_greeter: true,
                     latest: false,
                     yes: true,
                 },

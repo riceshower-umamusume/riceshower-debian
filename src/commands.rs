@@ -52,7 +52,7 @@ pub fn run(cli: Cli) -> Result<()> {
         }
         Command::Install {
             components,
-            no_greeter,
+            greeter,
             latest,
         } => {
             let os = distro::read_os_release()?;
@@ -66,7 +66,7 @@ pub fn run(cli: Cli) -> Result<()> {
                 &dotfiles_dir,
                 InstallOptions {
                     requested: &components,
-                    no_greeter,
+                    no_greeter: !greeter,
                     latest,
                     yes,
                 },
