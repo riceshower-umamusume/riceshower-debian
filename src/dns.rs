@@ -6,14 +6,16 @@ use std::path::Path;
 const DROP_IN: &str = "/etc/systemd/resolved.conf.d/90-riceshower-debian.conf";
 
 pub fn nameservers() -> Vec<String> {
-    let content = fs::read_to_string("/etc/resolv.conf").unwrap_or_default();
+    let content = fs::read_to_string("/run/systemd/resolve/resolv.conf")
+        .or_else(|_| fs::read_to_string("/etc/resolv.conf"))
+        .unwrap_or_default();
     content
         .lines()
         .filter_map(|line| {
             line.trim()
                 .strip_prefix("nameserver ")
                 .map(str::trim)
-                .filter(|value| !value.is_empty())
+                .filter(|value| !value.is_empty() && *value != "127.0.0.53")
                 .map(str::to_string)
         })
         .collect()
