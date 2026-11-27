@@ -25,17 +25,6 @@ fn parse_nameservers(content: &str) -> Vec<String> {
         .collect()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn skips_resolved_stub() {
-        let content = "nameserver 127.0.0.53\nnameserver 10.0.0.1\nnameserver fec0::1\n";
-        assert_eq!(parse_nameservers(content), vec!["10.0.0.1", "fec0::1"]);
-    }
-}
-
 pub fn apply(runner: &dyn Runner, dry_run: bool) -> Result<()> {
     let servers = nameservers();
     if servers.is_empty() {
@@ -75,4 +64,15 @@ pub fn apply(runner: &dyn Runner, dry_run: bool) -> Result<()> {
 
 pub fn read_systemd() -> Result<String> {
     fs::read_to_string(DROP_IN).with_context(|| format!("reading {DROP_IN}"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn skips_resolved_stub() {
+        let content = "nameserver 127.0.0.53\nnameserver 10.0.0.1\nnameserver fec0::1\n";
+        assert_eq!(parse_nameservers(content), vec!["10.0.0.1", "fec0::1"]);
+    }
 }
