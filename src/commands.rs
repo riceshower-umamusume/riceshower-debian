@@ -76,9 +76,42 @@ pub fn run(cli: Cli) -> Result<()> {
             let os = distro::read_os_release()?;
             let distro_id = distro::detect_distro(&os);
             let distro = require_distro(&manifest, &distro_id)?;
-            update_plan(&manifest, distro, &os, dry_run, latest)
+            update_plan(&manifest, distro, &os, dry_run, latest)?;
+            if dry_run {
+                return Ok(());
+            }
+            install_plan(
+                &manifest,
+                distro,
+                &os,
+                false,
+                &dotfiles_dir,
+                InstallOptions {
+                    requested: &[],
+                    no_greeter: true,
+                    latest: false,
+                    yes,
+                },
+            )
         }
-        Command::Repair => stub("repair", dry_run),
+        Command::Repair => {
+            let os = distro::read_os_release()?;
+            let distro_id = distro::detect_distro(&os);
+            let distro = require_distro(&manifest, &distro_id)?;
+            install_plan(
+                &manifest,
+                distro,
+                &os,
+                dry_run,
+                &dotfiles_dir,
+                InstallOptions {
+                    requested: &[],
+                    no_greeter: true,
+                    latest: false,
+                    yes: true,
+                },
+            )
+        }
         Command::Uninstall { purge } => {
             let os = distro::read_os_release()?;
             let distro_id = distro::detect_distro(&os);
