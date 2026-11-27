@@ -3,4 +3,4 @@ name = "libei"
 repo = "https://gitlab.freedesktop.org/libinput/libei.git"
 ref = "997b7c0f37faea4f8bae59613c8f27370925d5b0"
 build_system = "meson"
-build_options = ["-Dtests=disabled", "-Ddocumentation=disabled"]
+build_options = ["-Dtests=disabled"]
