@@ -13,6 +13,10 @@ pub struct AppManifest {
     #[serde(default)]
     pub packages: Vec<String>,
     #[serde(default)]
+    pub apt_source: Option<String>,
+    #[serde(default)]
+    pub apt_key: Option<String>,
+    #[serde(default)]
     pub notes: Option<String>,
 }
 
@@ -56,6 +60,33 @@ pub fn install(directory: &Path, id: &str, dry_run: bool, runner: &dyn Runner) -
             app.packages.join(" ")
         );
         return Ok(());
+    }
+    if let Some(source) = &app.apt_source {
+        let list = format!("/etc/apt/sources.list.d/noctalia-{}.list", app.id);
+        let output =
+            runner.run_with_stdin("sudo", &["--", "tee", &list], &format!("{source}\n"))?;
+        if !output.success {
+            bail!("writing {list} failed: {}", output.stderr.trim());
+        }
+        if let Some(key) = &app.apt_key {
+            let destination = format!("/etc/apt/keyrings/noctalia-{}.gpg", app.id);
+            let output = runner.run(
+                "sudo",
+                &[
+                    "--",
+                    "sh",
+                    "-c",
+                    &format!("curl -fsSL '{key}' | gpg --dearmor -o '{destination}'"),
+                ],
+            )?;
+            if !output.success {
+                bail!("importing app key failed: {}", output.stderr.trim());
+            }
+        }
+        let output = runner.run("sudo", &["--", "apt-get", "update"])?;
+        if !output.success {
+            bail!("apt-get update failed: {}", output.stderr.trim());
+        }
     }
     let mut args = vec!["--", "apt-get", "install", "-y", "--no-install-recommends"];
     args.extend(app.packages.iter().map(String::as_str));
