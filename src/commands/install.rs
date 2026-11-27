@@ -92,6 +92,14 @@ pub(super) fn install_plan(
     let sudo = SudoRunner::new(SystemRunner);
     let mut packages = resolved.packages.clone();
     packages.extend(distro.private_build_packages.iter().cloned());
+    let hardware = crate::hardware::detect(&SystemRunner)?;
+    packages.extend(
+        hardware
+            .gpu
+            .recommended_packages()
+            .iter()
+            .map(|package| (*package).to_string()),
+    );
     packages.sort();
     packages.dedup();
     println!("installing host packages...");
