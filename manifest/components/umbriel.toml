@@ -6,7 +6,7 @@ version_source = "VERSION"
 build_system = "meson"
 cxx_standard = 23
 build_tools = ["git", "meson", "ninja", "just", "cc", "cxx", "pkg-config", "wayland-scanner"]
-build_dependencies = ["wayland-client", "wayland-server", "wayland-protocols", "wlroots", "xkbcommon", "libinput", "libei", "pixman", "tomlplusplus", "nlohmann-json", "cairo", "pango", "libdrm", "libdisplay-info", "xcb", "xcb-icccm", "xcb-ewmh", "xcb-shape", "xcb-randr", "xcb-render"]
+build_dependencies = ["wayland-client", "wayland-server", "wayland-protocols", "wlroots", "xkbcommon", "libinput", "libei", "pixman", "tomlplusplus", "nlohmann-json", "cairo", "pango", "libdrm", "libdisplay-info", "xcb", "xcb-icccm", "xcb-ewmh", "xcb-shape", "xcb-randr", "xcb-render", "glesv2"]
 build_options = ["-Dtests=disabled"]
 component_dependencies = ["xdg-desktop-portal-umbriel"]
 runtime_dependencies = ["xwayland"]
@@ -87,3 +87,6 @@ pkg_config = ["xcb-randr"]
 
 [build_requirements.xcb-render]
 pkg_config = ["xcb-render"]
+
+[build_requirements.glesv2]
+pkg_config = ["glesv2"]
