@@ -23,6 +23,7 @@ pub(super) fn uninstall_plan(distro: &DistroManifest, dry_run: bool, purge: bool
         .components
         .values()
         .flat_map(|component| component.files.iter())
+        .filter(|file| !Path::new(file).is_dir())
         .collect();
     println!("uninstall plan");
     println!("  distro: {} ({})", distro.name, distro.id);
@@ -43,7 +44,7 @@ pub(super) fn uninstall_plan(distro: &DistroManifest, dry_run: bool, purge: bool
         if !Path::new(file).exists() {
             continue;
         }
-        let output = sudo.run("rm", &["-rf", "--", file])?;
+        let output = sudo.run("rm", &["-f", "--", file])?;
         if !output.success {
             failures.push(format!("{file}: {}", output.stderr.trim()));
         }
