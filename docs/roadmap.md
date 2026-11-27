@@ -9,13 +9,13 @@ Repo này mới bắt đầu lại lịch sử; không mang roadmap đa distro c
 - [x] `debian-stable`, `debian-testing`, `debian-sid`.
 - [x] Stable private dependency list; testing/sid system libraries.
 - [x] Prefix `/usr/local`; component build artifacts.
-- [ ] Xác minh tên package/version thật trên từng suite (container/VM).
+- [x] Xác minh tên package/version thật trên VM Debian 13/testing/sid.
 
 ## Giai đoạn 1 — Preflight
 
 - [x] APT/dpkg, pkg-config, compiler standard.
 - [x] Báo cáo installed/installable/missing/version/private; install thật dừng khi blocking.
-- [ ] Chạy preflight trong container stable/testing/sid.
+- [x] Preflight chạy trong VM Debian 13/testing/sid.
 
 ## Giai đoạn 2 — Source
 
@@ -28,42 +28,45 @@ Repo này mới bắt đầu lại lịch sử; không mang roadmap đa distro c
 - [x] Meson setup/compile/test/install `--destdir`; staging inventory SHA256.
 - [x] Prefix `/usr/local`; chặn path/symlink escape.
 - [x] 5/5 component build/staging đã chạy thật trên host Debian sid cũ.
-- [ ] Build 5/5 trong container stable/testing/sid của repo mới.
+- [x] Build 5/5 trong VM Debian 13/testing/sid (5/5 deploy `/usr/local`).
 
 ## Dotfiles/hardware đã có bản đầu tiên: config Umbriel/Noctalia/fcitx5/shell, backup/state,
 display 1920x1080@144, app catalog, `install-app` apt và GPU package profiles.
-Còn DNS, wizard, app source build và engine Noctalia install/deploy.
+DNS, display, wizard full, uninstall/update/repair và engine install/deploy đã có.
 
 Giai đoạn 4 — Stable private dependency builder
 
-- [ ] Pin source/SHA và recipe cho wlroots, wayland stack, libinput, xkbcommon,
+- [x] Pin source/SHA và recipe cho wlroots, wayland stack, libinput, xkbcommon,
   libdisplay-info, libei, sdbus-c++, WirePlumber.
-- [ ] Build vào `/opt/noctalia/deps`; pkg-config/linker/runtime wrapper.
-- [ ] Không nhiễm môi trường ứng dụng khác.
+- [x] Build vào `/opt/noctalia/deps`; pkg-config, RPATH runtime.
+- [x] Không nhiễm môi trường ứng dụng khác.
 
 ## Giai đoạn 5 — Deploy transaction
 
 - [x] Deploy writer cho `/usr/local`; inventory; file/symlink; backup/state/rollback.
 - [x] Package manager apt idempotent; không tự thêm repo.
 - [x] Unit test temp root; dry-run plan trong `install --dry-run`.
-- [ ] Chạy thật trên VM sạch /usr/local và kiểm tra session/greeter.
+- [x] Chạy thật trên VM sạch /usr/local; binary chạy với private libs.
+- [ ] Kiểm tra login/logout và greeter thật (VM không có GPU/seat).
 
 ## Giai đoạn 6 — Wizard, `--yes`, greeter
 
 - [x] Wizard mặc định (không subcommand): distro/GPU/output/DNS/dotfiles/apps.
 - [x] `--dry-run` in kế hoạch; `--yes` áp dụng dotfiles/display.
-- [ ] Wizard chạy luôn install Noctalia + app; hiện vẫn là lệnh riêng.
-- [ ] Greeter opt-in `--greeter`; không tự đổi DM; PAM/getty rollback-safe.
+- [x] Wizard `--yes` chạy luôn full install.
+- [x] Greeter opt-in `--greeter`; mặc định bỏ qua; không tự đổi DM.
+- [ ] PAM/getty rollback-safe trên máy thật.
 
 ## Giai đoạn 7 — Update/repair/uninstall
 
-- [ ] Update theo main, không rollback (quyết định hiện tại).
-- [ ] Repair/uninstall chỉ file do installer sở hữu; giữ config user.
+- [ ] Update theo main, không rollback (hiện update lockfile + redeploy).
+- [x] Repair/uninstall chỉ file do installer sở hữu; giữ config user.
 
 ## Giai đoạn 8 — Validation và CI
 
-- [ ] Container stable/testing/sid build + preflight.
-- [ ] VM sạch: clone, wizard/`--yes`, 5/5, login/logout, greeter opt-in.
+- [x] CI matrix container Debian 13/testing/sid.
+- [x] VM sạch: clone, wizard/`--yes`, 5/5 (sid/testing/stable).
+- [ ] Login/logout và greeter thật.
 - [ ] Release x86_64 với SHA256/attestation.
 
-Cho đến khi các mục trên xong, README phải ghi rõ đây là scaffold chưa cài được.
+Các mục còn lại: app build-from-source, login/greeter thật, release có attestation, GUI.
