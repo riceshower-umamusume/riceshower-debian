@@ -3,7 +3,7 @@ name = "Debian stable"
 family = "debian"
 package_manager = "apt"
 private_dependencies = ["wlroots", "wayland-client", "wayland-server", "wayland-cursor", "wayland-protocols", "libinput", "xkbcommon", "pixman", "libdrm", "libdisplay-info", "libei", "sdbus-cpp", "wireplumber-dev", "wireplumber"]
-private_build_packages = ["bison", "cmake", "libseat-dev", "libwacom-dev", "libxcb-composite0-dev", "libxcb-xfixes0-dev", "libxcb-xkb-dev", "python3-pytest", "libexpat1-dev", "libffi-dev", "libevdev-dev", "libmtdev-dev", "libudev-dev", "libsystemd-dev", "libpciaccess-dev", "hwdata", "libspa-0.2-dev", "libdbus-1-dev", "libcap-dev"]
+private_build_packages = ["bison", "cmake", "libseat-dev", "libwacom-dev", "libxcb-composite0-dev", "libxcb-dri3-dev", "libxcb-res0-dev", "libxcb-xfixes0-dev", "libxcb-xkb-dev", "python3-pytest", "libexpat1-dev", "libffi-dev", "libevdev-dev", "libmtdev-dev", "libudev-dev", "libsystemd-dev", "libpciaccess-dev", "hwdata", "libspa-0.2-dev", "libdbus-1-dev", "libcap-dev"]
 
 [[versions]]
 id = "13"
