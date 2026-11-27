@@ -3,7 +3,7 @@ use crate::distro;
 use crate::hardware;
 use crate::manifest::Manifest;
 use crate::process::SystemRunner;
-use anyhow::Result;
+use anyhow::{bail, Result};
 use std::fs;
 use std::path::Path;
 
@@ -58,10 +58,33 @@ pub(super) fn wizard(
     println!("apps:");
     apps::print(apps_dir)?;
 
-    if !dry_run {
-        println!("next: ./install.sh install --dry-run, then ./install.sh install --yes");
-    } else {
+    if dry_run {
         println!("dry-run: no changes made");
+        return Ok(());
+    }
+    if yes {
+        println!("wizard: applying the full install plan");
+        let os = distro::read_os_release()?;
+        let distro_id = distro::detect_distro(&os);
+        if let Some(distro) = manifest.distros.get(&distro_id) {
+            super::install::install_plan(
+                manifest,
+                distro,
+                &os,
+                false,
+                dotfiles_dir,
+                super::install::InstallOptions {
+                    requested: &[],
+                    no_greeter: false,
+                    latest: false,
+                    yes: true,
+                },
+            )?;
+        } else {
+            bail!("distro '{distro_id}' is not in the manifest");
+        }
+    } else {
+        println!("next: ./install.sh install --dry-run, then ./install.sh install --yes");
     }
     Ok(())
 }
