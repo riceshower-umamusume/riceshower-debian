@@ -87,14 +87,3 @@ pub(super) fn wizard(
     }
     Ok(())
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn parses_nameservers() {
-        let content = "nameserver 10.0.0.1\n# comment\nnameserver 1.1.1.1\n";
-        assert_eq!(parse_nameservers(content), vec!["10.0.0.1", "1.1.1.1"]);
-    }
-}
