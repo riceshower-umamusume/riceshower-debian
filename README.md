@@ -1,3 +1,19 @@
+## Verified installs
+
+The installer has been run end-to-end in clean Debian 13 (stable), Debian 14
+(testing) and Debian sid QEMU VMs: all five components built from source and
+deployed to `/usr/local`, dotfiles (including the DP-1 1920x1080@144 display
+profile and DNS drop-in) applied, and the binaries verified against system or
+private `/opt/noctalia/deps` libraries.
+
+### Lifecycle
+
+- `install` builds and deploys; `--greeter` opts into Noctalia Greeter.
+- `update [--latest]` refreshes the lockfile and redeploys.
+- `repair` reruns the pinned install plan.
+- `uninstall [--purge]` removes state-recorded files and optionally packages.
+- `list-apps` / `install-app <id>` use the app catalog with apt source/key support.
+
 # riceshower-debian
 
 Noctalia full-ecosystem installer for **Debian stable, testing and sid**, built from source.

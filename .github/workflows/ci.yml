@@ -27,3 +27,19 @@ jobs:
       - uses: actions/checkout@v5
       - run: sudo apt-get update && sudo apt-get install -y shellcheck
       - run: shellcheck install.sh
+
+  debian:
+    name: Debian ${{ matrix.image }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        image: [debian:13, debian:testing, debian:sid]
+    container: ${{ matrix.image }}
+    steps:
+      - uses: actions/checkout@v5
+      - run: apt-get update && apt-get install -y curl ca-certificates build-essential pkg-config git
+      - run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+      - run: . "$HOME/.cargo/env" && cargo fmt --all -- --check && cargo clippy --all-targets -- -D warnings && cargo test --all && cargo build --release
+      - run: . "$HOME/.cargo/env" && ./install.sh list-components
+      - run: . "$HOME/.cargo/env" && ./install.sh install --dry-run || true
