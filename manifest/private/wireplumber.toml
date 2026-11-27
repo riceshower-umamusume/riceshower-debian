@@ -4,4 +4,4 @@ repo = "https://gitlab.freedesktop.org/pipewire/wireplumber.git"
 ref = "7a4d3177550b6b53fe0a49396da5b07f5353daff"
 build_system = "meson"
 build_component_dependencies = ["sdbus-cpp"]
-build_options = ["-Dtests=false", "-Ddocs=false"]
+build_options = ["-Dtests=false"]
