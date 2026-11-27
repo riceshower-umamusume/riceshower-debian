@@ -7,7 +7,7 @@ build_system = "meson"
 cxx_standard = 23
 build_tools = ["git", "meson", "ninja", "just", "cc", "cxx", "pkg-config", "wayland-scanner"]
 build_dependencies = ["wayland-protocols", "glib", "curl", "libxml", "gdk-pixbuf", "tomlplusplus", "xkbcommon", "libarchive", "liblzma", "libacl", "libpng", "librsvg", "nlohmann-json", "wayland-client", "wayland-cursor", "cairo", "pango", "freetype", "fontconfig", "harfbuzz", "epoxy"]
-build_options = ["-Dtests=disabled"]
+build_options = ["-Dtests=disabled", "-Dwerror=false"]
 runtime_dependencies = ["xdg-desktop-portal"]
 artifacts = [
   "bin/luciole",
