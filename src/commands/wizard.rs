@@ -4,7 +4,6 @@ use crate::hardware;
 use crate::manifest::Manifest;
 use crate::process::SystemRunner;
 use anyhow::{bail, Result};
-use std::fs;
 use std::path::Path;
 
 pub(super) fn wizard(
@@ -36,7 +35,7 @@ pub(super) fn wizard(
         detected.gpu.recommended_packages().join(", ")
     );
 
-    let nameservers = read_nameservers()?;
+    let nameservers = crate::dns::nameservers();
     println!(
         "dns: {}",
         if nameservers.is_empty() {
@@ -87,24 +86,6 @@ pub(super) fn wizard(
         println!("next: ./install.sh install --dry-run, then ./install.sh install --yes");
     }
     Ok(())
-}
-
-fn read_nameservers() -> Result<Vec<String>> {
-    let content = fs::read_to_string("/etc/resolv.conf").unwrap_or_default();
-    Ok(parse_nameservers(&content))
-}
-
-fn parse_nameservers(content: &str) -> Vec<String> {
-    content
-        .lines()
-        .filter_map(|line| {
-            line.trim()
-                .strip_prefix("nameserver ")
-                .map(str::trim)
-                .filter(|value| !value.is_empty())
-                .map(str::to_string)
-        })
-        .collect()
 }
 
 #[cfg(test)]
