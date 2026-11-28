@@ -108,13 +108,15 @@ pub fn build_component(
         ];
         run_meson(runner, &compile, "meson compile", env)?;
 
-        let tests = vec![
-            "test".to_string(),
-            "-C".to_string(),
-            path_string(&build_dir)?,
-            "--print-errorlogs".to_string(),
-        ];
-        run_meson(runner, &tests, "meson test", env)?;
+        if component.run_tests {
+            let tests = vec![
+                "test".to_string(),
+                "-C".to_string(),
+                path_string(&build_dir)?,
+                "--print-errorlogs".to_string(),
+            ];
+            run_meson(runner, &tests, "meson test", env)?;
+        }
 
         let install = vec![
             "install".to_string(),

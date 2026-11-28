@@ -47,6 +47,8 @@ pub struct ComponentManifest {
     pub layer: Option<String>,
     #[serde(default)]
     pub allow_submodules: bool,
+    #[serde(default = "default_true")]
+    pub run_tests: bool,
 }
 
 #[derive(Debug, Clone, Deserialize)]
