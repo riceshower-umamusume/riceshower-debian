@@ -90,6 +90,61 @@ cargo clippy --all-targets -- -D warnings
 `install` without `--dry-run` still stops before deployment. The build command fetches
 the locked source and stages it under `~/.cache/noctalia-setup` without changing the host.
 
+## Terminal, zsh and hotkeys
+
+`install`/`config` installs the terminal profile, applies the zsh dotfiles and,
+if `/usr/bin/zsh` exists, changes the user's login shell with
+`chsh -s /usr/bin/zsh` (dry-run prints it; restart the session or run
+`exec zsh`). The VM verification ended with `SHELL=/usr/bin/zsh`.
+
+Hotkeys in `~/.zshrc`:
+
+- `Ctrl-R` — fzf history search
+- `Ctrl-T` — fzf file picker
+- `Alt-C` — fzf directory change
+- `→` / `End` — accept zsh-autosuggestions
+- `Tab` — completion; `z <dir>` / `zi` — zoxide; `ls`/`ll`/`la` — eza
+
+The keymap is Emacs (`bindkey -e`). `zsh-syntax-highlighting` has no keybinding.
+
+## Languages
+
+- `install.sh` — **bash** (`#!/usr/bin/env bash`, `[[`, `set -Eeuo pipefail`).
+  Run `./install.sh` or `bash install.sh`; do not run `zsh install.sh` (the
+  script now prints an explicit error if invoked by zsh).
+- `src/*.rs` — **Rust** CLI; `install.sh` builds/runs it with Cargo.
+- `manifest/`, `profiles/`, `apps/` — **TOML**.
+- `dotfiles/files/shell/zshrc` — **zsh**; `bashrc`/`profile` — bash/sh;
+  Noctalia/Umbriel/fcitx5 configs — TOML/JSON.
+- No Python or make-based installer; upstream components use Meson/Cargo.
+
+## Step-by-step
+
+```bash
+git clone https://github.com/riceshower-umamusume/riceshower-debian.git
+cd riceshower-debian
+./install.sh doctor                 # read-only distro/state check
+./install.sh hardware               # GPU/output/mode
+./install.sh install --dry-run      # full plan
+./install.sh install --dry-run --profile gaming
+./install.sh install --yes          # default: all profiles
+# optional: ./install.sh install --yes --greeter
+exec zsh                            # or log out/in; shell is already changed
+echo $SHELL; starship --version
+./install.sh config                 # reapply dotfiles/DNS/shell
+./install.sh config --dry-run
+./install.sh install-app fcitx5-lotus --dry-run
+./install.sh install-app fcitx5-lotus
+./install.sh install-app brave-origin-nightly
+./install.sh update / repair / uninstall
+```
+
+After install, log out/in for the session environment and choose the Umbriel /
+Noctalia session; the greeter is opt-in and the repo never switches the display
+manager automatically. Steam first-run is manual; MangoHud env is
+`~/.config/environment.d/90-gaming.conf`, and the Steam launch example is
+`gamescope -W 1920 -H 1080 -r 144 --mangoapp -- %command%`.
+
 ## Layout
 
 ```

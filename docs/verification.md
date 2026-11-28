@@ -115,7 +115,14 @@ ls='eza --icons --group-directories-first'
 ```
 
 The `zle` warning in a non-TTY `zsh -ic` is expected; interactive zsh loads
-zsh-autosuggestions and zsh-syntax-highlighting normally.
+zsh-autosuggestions and zsh-syntax-highlighting normally. After
+`config`, the VM reported `SHELL=/usr/bin/zsh`; `bindkey` showed:
+
+```
+"^R" fzf-history-widget
+"^T" fzf-file-widget
+"^[c" fzf-cd-widget
+```
 
 ## Automated checks
 
