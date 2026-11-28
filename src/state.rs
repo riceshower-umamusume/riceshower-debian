@@ -41,6 +41,7 @@ pub fn load(path: &Path) -> Result<Option<State>> {
     Ok(Some(state))
 }
 
+#[cfg(test)]
 pub fn save(path: &Path, state: &State) -> Result<()> {
     let content = toml::to_string_pretty(state).context("serializing state")?;
     atomic_file::write(path, content.as_bytes())

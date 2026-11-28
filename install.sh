@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+if [ -n "${ZSH_VERSION:-}" ]; then
+  printf 'install.sh must run with bash: use ./install.sh or bash install.sh, not zsh install.sh.\n' >&2
+  exit 1
+fi
+
 ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 CARGO=${CARGO:-}
 

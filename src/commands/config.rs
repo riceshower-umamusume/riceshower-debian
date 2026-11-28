@@ -1,7 +1,7 @@
 use crate::dns;
 use crate::dotfiles;
 use crate::hardware;
-use crate::process::SystemRunner;
+use crate::process::{SudoRunner, SystemRunner};
 use anyhow::Result;
 use std::path::Path;
 
@@ -23,7 +23,9 @@ pub(super) fn config(dotfiles_dir: &Path, dry_run: bool) -> Result<()> {
     } else {
         dotfiles::write_display(home, &display, dry_run)?;
     }
-    dns::apply(&crate::process::SudoRunner::new(SystemRunner), dry_run)?;
+    let sudo = SudoRunner::new(SystemRunner);
+    dns::apply(&sudo, dry_run)?;
+    crate::shell::ensure_zsh(&sudo, dry_run)?;
     Ok(())
 }
 

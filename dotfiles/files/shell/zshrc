@@ -13,6 +13,15 @@ compinit
 [ -f /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ] && source /usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 [ -f /usr/share/doc/fzf/examples/key-bindings.zsh ] && source /usr/share/doc/fzf/examples/key-bindings.zsh
 
+# Emacs keymap; fzf keys: Ctrl-R history, Ctrl-T files, Alt-C cd.
+# zsh-autosuggestions: accept with Right arrow or End; Tab completes.
+bindkey -e
+if (( $+widgets[fzf-history-widget] )); then
+  bindkey '^R' fzf-history-widget
+  bindkey '^T' fzf-file-widget
+  bindkey '^[c' fzf-cd-widget
+fi
+
 if command -v zoxide >/dev/null 2>&1; then
   eval "$(zoxide init zsh)"
 fi
