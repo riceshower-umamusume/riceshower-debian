@@ -8,6 +8,8 @@ private `/opt/noctalia/deps` libraries.
 
 ### Lifecycle
 
+- App catalog verified in the testing VM: `fcitx5-lotus` 7.0.2 and
+  `brave-browser-nightly` 1.102.46 installed from their upstream apt repos.
 - `install` builds and deploys; `--greeter` opts into Noctalia Greeter.
 - `update [--latest]` refreshes the lockfile and redeploys.
 - `repair` reruns the pinned install plan.
