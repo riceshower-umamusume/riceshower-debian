@@ -70,3 +70,14 @@ Giai đoạn 4 — Stable private dependency builder
 - [ ] Release x86_64 với SHA256/attestation.
 
 Các mục còn lại: app build-from-source, login/greeter thật, release có attestation, GUI.
+
+## Giai đoạn 9 — Gaming, GPU và terminal
+
+- [x] Profiles `base`, `terminal`, `gaming`, `all`; `--profile` trong install/wizard/update/repair.
+- [x] Tự bật `contrib`/`non-free`, i386 multiarch, microcode theo CPU, apt update.
+- [x] Steam/gamescope/MangoHud/GameMode/Lutris/Wine/i386 Mesa-Vulkan.
+- [x] zsh + starship + autosuggestions + syntax-highlighting + fzf/eza/bat/fd/rg/zoxide.
+- [x] Starship build từ source bằng cargo vào `/usr/local`; dotfiles zsh/starship/MangoHud.
+- [ ] Verify full gaming/terminal install trên VM sid/testing/stable.
+- [ ] Source recipe cho gamescope/MangoHud/GameMode.
+- [ ] Steam first-run, 32-bit Vulkan và GPU vendor trên máy thật.

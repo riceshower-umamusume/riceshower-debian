@@ -20,18 +20,12 @@ private `/opt/noctalia/deps` libraries.
 
 Noctalia full-ecosystem installer for **Debian stable, testing and sid**, built from source.
 
-> **Status: engine ported, installer not finished.** The repo was created fresh after
-> deleting the three previous Noctalia setup repositories. The manifest, dependency
-> preflight, source cache and Meson build/staging engine are ported and tested. A first
-> personal dotfiles layer is now present: hardware detection, Umbriel/Noctalia/fcitx5/
-> shell configs with backup/state, generated display mode (currently 1920x1080@144),
-> an app catalog (fcitx5-lotus, Brave Origin Nightly), `install-app` apt installation
-> and GPU package recommendations. Deploy, the stable private-
-> dependency builder, the wizard, app installation, DNS/GPU profiles, greeter setup,
-> update/repair, uninstall and VM validation are still missing. The package/build/deploy
-> transaction is implemented and tested with a temp root, but has not been run against a
-> real `/usr/local` installation or a clean VM yet. This is not yet a
-> "clone and it installs everything" repo.
+> **Status: Noctalia install plus base/terminal/gaming profiles.** The engine builds
+> the five Noctalia components from source, prepares Debian apt (contrib/non-free,
+> i386 for Steam, CPU microcode), installs the base/terminal/gaming package profiles,
+> builds Starship from source with cargo, and applies the dotfiles. The default
+> `install` runs all profiles; select a subset with `--profile base|terminal|gaming`.
+> Full gaming/terminal VM verification is in progress.
 
 ## Scope
 
@@ -79,6 +73,9 @@ cd riceshower-debian
 ./install.sh list-apps
 ./install.sh install-app fcitx5-lotus --dry-run
 ./install.sh install --dry-run
+./install.sh install --dry-run --profile gaming
+./install.sh install --dry-run --profile terminal
+./install.sh install --dry-run --profile base
 ./install.sh config --dry-run
 ./install.sh config
 ./install.sh build umbriel
@@ -99,19 +96,31 @@ manifest/distros/    debian-stable.toml, debian-testing.toml, debian-sid.toml
 manifest/lock/       source snapshot used by the build command
 dotfiles/            personal config manifest + Umbriel/Noctalia/fcitx5/shell files
 apps/                app catalog (fcitx5-lotus, Brave Origin Nightly)
-docs/                design, roadmap, dependency audit
+profiles/            base, terminal, gaming and all install profiles
+manifest/tools/      source tools (starship via cargo)
+docs/                design, roadmap, dependency and gaming research
 install.sh           bootstrap wrapper
 ```
 
+## Gaming and terminal profiles
+
+- `base`: firmware, CPU microcode, earlyoom, zram, timeshift, build tools.
+- `terminal`: zsh, starship (source, cargo), autosuggestions, syntax highlighting,
+  fzf, eza, bat, fd, ripgrep, zoxide.
+- `gaming`: Steam, gamescope, MangoHud, GameMode, Lutris, Wine, i386 Mesa/Vulkan.
+- `all` (default): base + terminal + gaming.
+
+`./install.sh install --dry-run --profile gaming` previews one profile. A full
+install enables Debian `contrib`/`non-free`, adds i386, installs the packages,
+builds Starship to `/usr/local`, then applies the zsh/starship/MangoHud dotfiles.
+Steam launch example: `gamescope -W 1920 -H 1080 -r 144 --mangoapp -- %command%`.
+
 ## Next work
 
-1. App installation from the catalog, starting with fcitx5-lotus and Brave.
-2. DNS config module and GPU vendor package profiles.
-3. Stable private-dependency builder into `/opt/noctalia/deps`.
-4. Deploy transaction to `/usr/local` with backup/state/rollback.
-5. Wizard and `--yes` defaults.
-6. Greeter/PAM/getty integration, opt-in and rollback-safe.
-7. Update/repair/uninstall and clean Debian stable/testing/sid VM validation.
+1. Finish full gaming/terminal VM verification on sid/testing/stable.
+2. Add pinned source recipes for gamescope, MangoHud and GameMode.
+3. Verify Steam first-run, 32-bit Vulkan and the GPU vendor packages on real hardware.
+4. Optional GUI front-end over the same profiles.
 
 ## License
 
