@@ -98,6 +98,14 @@ rejecting tracked modifications). MangoHud was built and deployed with
 /usr/local/bin/mangohud    v0.8.4
 ```
 
+A real Vulkan frame was also submitted on the host GPU with the extracted
+`vkcube` binary (no host install):
+
+```
+Selected WSI platform: wayland
+Selected GPU 0: AMD Radeon RX 580 2048SP (RADV POLARIS10), type: DiscreteGpu
+```
+
 ## Terminal
 
 ```

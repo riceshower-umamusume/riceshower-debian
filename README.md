@@ -25,7 +25,7 @@ Noctalia full-ecosystem installer for **Debian stable, testing and sid**, built 
 > i386 for Steam, CPU microcode), installs the base/terminal/gaming package profiles,
 > builds Starship from source with cargo, and applies the dotfiles. The default
 > `install` runs all profiles; select a subset with `--profile base|terminal|gaming`.
-> Full gaming/terminal install verified on a clean Debian sid VM: 41 profile packages,
+> Full gaming/terminal install verified on a clean Debian sid VM: profile packages,
 > i386/contrib/non-free, Starship 1.22.1 built from source, Steam/MangoHud/GameMode/
 > Gamescope and the zsh/starship/MangoHud dotfiles. Stable and testing profile
 > dry-runs pass.
