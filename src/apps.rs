@@ -15,11 +15,22 @@ pub struct AppManifest {
     #[serde(default)]
     pub apt_source: Option<String>,
     #[serde(default)]
-    pub apt_key: Option<String>,
-    #[serde(default)]
     pub apt_key_file: Option<String>,
     #[serde(default)]
     pub notes: Option<String>,
+}
+
+fn validate_id(id: &str) -> Result<()> {
+    if id.is_empty()
+        || id
+            .bytes()
+            .any(|byte| !(byte.is_ascii_alphanumeric() || matches!(byte, b'-' | b'_' | b'.')))
+        || id == "."
+        || id == ".."
+    {
+        bail!("invalid app id '{id}'");
+    }
+    Ok(())
 }
 
 pub fn load(directory: &Path) -> Result<Vec<AppManifest>> {
@@ -36,6 +47,17 @@ pub fn load(directory: &Path) -> Result<Vec<AppManifest>> {
             fs::read_to_string(&path).with_context(|| format!("reading {}", path.display()))?;
         let app: AppManifest =
             toml::from_str(&content).with_context(|| format!("parsing {}", path.display()))?;
+        validate_id(&app.id)?;
+        if let Some(key) = &app.apt_key_file {
+            let key = Path::new(key);
+            if key.is_absolute()
+                || key
+                    .components()
+                    .any(|part| !matches!(part, std::path::Component::Normal(_)))
+            {
+                bail!("app '{}' has an unsafe key path", app.id);
+            }
+        }
         apps.push(app);
     }
     apps.sort_by(|left, right| left.id.cmp(&right.id));
@@ -105,20 +127,6 @@ pub fn install(directory: &Path, id: &str, dry_run: bool, runner: &dyn Runner) -
             )?;
             if !output.success {
                 bail!("installing app key failed: {}", output.stderr.trim());
-            }
-        } else if let Some(key) = &app.apt_key {
-            let destination = format!("/etc/apt/keyrings/noctalia-{}.gpg", app.id);
-            let output = runner.run(
-                "sudo",
-                &[
-                    "--",
-                    "sh",
-                    "-c",
-                    &format!("curl -fsSL '{key}' | gpg --dearmor -o '{destination}'"),
-                ],
-            )?;
-            if !output.success {
-                bail!("importing app key failed: {}", output.stderr.trim());
             }
         }
         let output = runner.run("sudo", &["--", "apt-get", "update"])?;
