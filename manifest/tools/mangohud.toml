@@ -3,3 +3,4 @@ name = "MangoHud"
 repo = "https://github.com/flightlessmango/MangoHud"
 ref = "992103e4fb744897826de04ea00a2f71e7018214"
 build_system = "meson"
+allow_submodules = true

@@ -14,6 +14,7 @@ mod version;
 mod wizard;
 
 use build::build_component;
+use build::build_tool;
 use doctor::doctor;
 use install::{install_plan, InstallOptions};
 use uninstall::uninstall_plan;
@@ -48,8 +49,17 @@ pub fn run(cli: Cli) -> Result<()> {
         Command::Hardware => config::hardware_command(),
         Command::ListApps => apps::print(&apps_dir),
         Command::InstallApp { id } => apps::install(&apps_dir, &id, dry_run, &SystemRunner),
-        Command::Build { component, commit } => {
-            build_component(&manifest, &component, commit.as_deref(), dry_run)
+        Command::Build {
+            component,
+            tool,
+            commit,
+        } => {
+            if let Some(tool) = tool {
+                build_tool(&manifest, &tool, commit.as_deref(), dry_run)
+            } else {
+                let component = component.context("build requires a component or --tool")?;
+                build_component(&manifest, &component, commit.as_deref(), dry_run)
+            }
         }
         Command::ListComponents => list_components(&manifest),
         Command::Doctor => {

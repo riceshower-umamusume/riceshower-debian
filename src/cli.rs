@@ -67,9 +67,11 @@ pub enum Command {
         #[arg(long)]
         purge: bool,
     },
-    /// Build and stage one component from the lockfile
+    /// Build and stage one component or source tool
     Build {
-        component: String,
+        component: Option<String>,
+        #[arg(long)]
+        tool: Option<String>,
         #[arg(long)]
         commit: Option<String>,
     },

@@ -48,3 +48,45 @@ pub(super) fn build_component(
     );
     Ok(())
 }
+
+pub(super) fn build_tool(
+    manifest: &Manifest,
+    tool_id: &str,
+    commit: Option<&str>,
+    dry_run: bool,
+) -> Result<()> {
+    let tools = crate::manifest::load_tools(&manifest.root)?;
+    let tool = tools
+        .get(tool_id)
+        .with_context(|| format!("unknown source tool '{tool_id}'"))?;
+    let commit = commit.unwrap_or(&tool.git_ref);
+    let cache = source::cache_root()?;
+
+    println!("tool build plan");
+    println!("  tool: {} ({})", tool.id, tool.name);
+    println!("  commit: {commit}");
+    println!("  cache: {}", cache.display());
+    if dry_run {
+        println!("dry-run: source fetch and build were not run");
+        return Ok(());
+    }
+
+    let source_dir = source::acquire_component(tool, commit, &SystemRunner)?;
+    let outcome = build::build_component(
+        tool,
+        commit,
+        &source_dir,
+        &cache,
+        build::SYSTEM_PREFIX,
+        &[],
+        &SystemRunner,
+    )?;
+    println!("source: {}", outcome.source_dir.display());
+    println!("staging: {}", outcome.staging_dir.display());
+    println!(
+        "inventory: {} ({} entries)",
+        outcome.inventory_path.display(),
+        outcome.inventory.files.len()
+    );
+    Ok(())
+}
