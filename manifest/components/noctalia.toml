@@ -6,7 +6,7 @@ version_source = "VERSION"
 build_system = "meson"
 cxx_standard = 23
 build_tools = ["git", "meson", "ninja", "just", "cc", "cxx", "pkg-config", "wayland-scanner"]
-build_dependencies = ["sdbus-cpp", "wayland-client", "wayland-server", "wayland-protocols", "cairo", "pango", "xkbcommon", "glib", "libsecret", "libsodium", "polkit-agent", "polkit-gobject", "pipewire-dev", "wireplumber-dev", "curl", "qalculate", "libxml", "md4c", "nlohmann-json", "tomlplusplus", "libical", "webp", "sndfile", "pam", "stb"]
+build_dependencies = ["sdbus-cpp", "wayland-client", "wayland-server", "wayland-protocols", "cairo", "pango", "xkbcommon", "glib", "libsecret", "libsodium", "polkit-agent", "polkit-gobject", "pipewire-dev", "wireplumber-dev", "curl", "qalculate", "libxml", "md4c", "nlohmann-json", "tomlplusplus", "libical", "webp", "sndfile", "pam", "stb", "libjxl"]
 build_options = ["-Dtests=disabled", "-Djemalloc=disabled"]
 runtime_dependencies = ["pipewire", "wireplumber"]
 artifacts = [
@@ -84,6 +84,9 @@ pkg_config = ["libical"]
 
 [build_requirements.pam]
 pkg_config = []
+
+[build_requirements.libjxl]
+pkg_config = ["libjxl", "libjxl_threads"]
 
 [build_requirements.stb]
 pkg_config = []
