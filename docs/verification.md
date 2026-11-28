@@ -86,8 +86,17 @@ Gamescope needs submodules (`wlroots`, `libliftoff`, `vkroots`,
 allows them when the tool manifest sets `allow_submodules = true`; otherwise the
 existing submodule policy still fails the fetch.
 
-The engine uses the same source/build path for these tools and keeps the apt
-package as a fallback if a source build fails.
+The engine path was verified too: `install --profile gaming` built and deployed
+GameMode and Gamescope to `/usr/local` (source cache now ignores generated
+untracked files such as Meson `.wraplock`/wrapped subprojects while still
+rejecting tracked modifications). MangoHud was built and deployed with
+`build --tool mangohud --deploy`. Live paths/versions:
+
+```
+/usr/local/bin/gamemoded   gamemode version v1.8.2
+/usr/local/bin/gamescope   gamescope version e6674a9
+/usr/local/bin/mangohud    v0.8.4
+```
 
 ## Terminal
 

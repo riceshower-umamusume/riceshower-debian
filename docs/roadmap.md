@@ -79,6 +79,8 @@ Các mục còn lại: app build-from-source, login/greeter thật, release có 
 - [x] zsh + starship + autosuggestions + syntax-highlighting + fzf/eza/bat/fd/rg/zoxide.
 - [x] Starship build từ source bằng cargo vào `/usr/local`; dotfiles zsh/starship/MangoHud.
 - [x] Verify full gaming/terminal install trên VM sid; dry-run stable/testing.
+- [x] Engine source-tool path verified: GameMode + Gamescope deploy qua install;
+  MangoHud deploy qua `build --tool mangohud --deploy`.
 - [ ] Verify full gaming/terminal install trên VM stable/testing.
 - [x] Source recipe pinned cho gamescope 3.17.0, MangoHud 0.8.4, GameMode 1.8.2;
   build deps + apt fallback; test source pass trong VM sid.

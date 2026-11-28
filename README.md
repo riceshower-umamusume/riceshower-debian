@@ -112,6 +112,8 @@ install.sh           bootstrap wrapper
   fzf, eza, bat, fd, ripgrep, zoxide.
 - `gaming`: Steam, Lutris, Wine, i386 Mesa/Vulkan, plus Gamescope, MangoHud and
   GameMode built from pinned source recipes (apt packages stay as fallback).
+  `build --tool <id> [--deploy]` builds/deploys one source tool without a full
+  install.
 - `all` (default): base + terminal + gaming.
 
 `./install.sh install --dry-run --profile gaming` previews one profile. A full
