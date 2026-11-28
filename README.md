@@ -239,7 +239,7 @@ Installer nhận diện vendor GPU từ sysfs PCI vendor ID:
 | NVIDIA | `nvidia-driver`, `nvidia-vulkan-icd` |
 | Không nhận diện | Không thêm package GPU đề xuất |
 
-Việc cài đặt các package này phụ thuộc kết quả phát hiện GPU và profile install. Trên máy nhiều GPU, logic hiện tại lấy vendor đầu tiên được tìm thấy trong `/sys/class/drm`; hãy kiểm tra bằng `./install.sh hardware` và xem kế hoạch `--dry-run` trước khi cài.
+Trong lệnh install, các package GPU đề xuất được thêm vào kế hoạch cài đặt theo kết quả phát hiện phần cứng, kể cả khi bạn chọn riêng một profile. Trên máy nhiều GPU, logic hiện tại lấy vendor đầu tiên được tìm thấy trong `/sys/class/drm`; hãy kiểm tra bằng `./install.sh hardware` và xem kế hoạch `--dry-run` trước khi cài.
 
 Nếu Umbriel đang chạy, lệnh hardware đọc output/mode từ `umbriel outputs`. Khi áp dụng cấu hình, repo chọn mode có độ phân giải pixel cao nhất, sau đó ưu tiên refresh rate cao nhất, rồi tạo `~/.config/umbriel/display.toml`. Cấu hình màn hình mặc định trong repo có DP-1 1920x1080@144; cấu hình sinh ra từ phần cứng đang chạy có thể thay thế nội dung đó.
 
