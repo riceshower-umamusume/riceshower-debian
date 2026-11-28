@@ -63,6 +63,12 @@ pub fn run(cli: Cli) -> Result<()> {
             }
         }
         Command::ListComponents => list_components(&manifest),
+        Command::Boot { disk, efi_dir } => {
+            let os = distro::read_os_release()?;
+            let distro_id = distro::detect_distro(&os);
+            let distro = require_distro(&manifest, &distro_id)?;
+            crate::boot::boot(distro, disk.as_deref(), &efi_dir, dry_run, yes)
+        }
         Command::Doctor => {
             let os = distro::read_os_release()?;
             let distro_id = distro::detect_distro(&os);

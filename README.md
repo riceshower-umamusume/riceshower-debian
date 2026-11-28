@@ -90,6 +90,33 @@ cargo clippy --all-targets -- -D warnings
 `install` without `--dry-run` still stops before deployment. The build command fetches
 the locked source and stages it under `~/.cache/noctalia-setup` without changing the host.
 
+## Boot repair (BIOS and UEFI)
+
+The installer never writes the bootloader. On a fresh mini.iso install where the
+firmware boot menu has no Debian entry, inspect and then repair it explicitly:
+
+```bash
+./install.sh boot --dry-run
+./install.sh boot --yes    # uses sudo; reboot afterwards
+```
+
+It detects BIOS vs UEFI, derives the root disk with `findmnt`/`lsblk` (override
+with `--disk /dev/nvme0n1`), installs `grub-pc` or `grub-efi-amd64`, runs
+`grub-install --recheck`, `update-grub`, and creates an EFI boot entry if
+`efibootmgr` shows none. On UEFI, mount the ESP at `/boot/efi` first, or pass
+`--efi-dir`. Safe on a running installed system; for a system that cannot boot,
+chroot from a live USB:
+
+```bash
+mount /dev/nvme0n1p1 /mnt
+mount --bind /dev /mnt/dev
+mount --bind /proc /mnt/proc
+mount --bind /sys /mnt/sys
+chroot /mnt
+# clone the repo inside the chroot, then:
+./install.sh boot --yes --disk /dev/nvme0n1
+```
+
 ## Terminal, zsh and hotkeys
 
 `install`/`config` installs the terminal profile, applies the zsh dotfiles and,

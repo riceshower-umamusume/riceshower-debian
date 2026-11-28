@@ -88,4 +88,13 @@ pub enum Command {
     InstallApp { id: String },
     /// List components from the manifest
     ListComponents,
+    /// Install or repair GRUB on the root disk (BIOS or UEFI)
+    Boot {
+        /// Block device, e.g. /dev/nvme0n1 (default: detected root disk)
+        #[arg(long)]
+        disk: Option<PathBuf>,
+        /// EFI System Partition mount point used on UEFI
+        #[arg(long, default_value = "/boot/efi")]
+        efi_dir: PathBuf,
+    },
 }

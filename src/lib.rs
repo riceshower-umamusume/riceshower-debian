@@ -1,5 +1,6 @@
 mod apps;
 mod atomic_file;
+pub mod boot;
 pub mod build;
 pub mod cli;
 pub mod commands;
