@@ -2,7 +2,7 @@ id = "brave-origin-nightly"
 name = "Brave Origin Nightly"
 kind = "apt"
 repo = "https://brave-browser-apt-nightly.s3.brave.com/"
-packages = ["brave-origin-nightly"]
-apt_source = "deb [signed-by=/etc/apt/keyrings/noctalia-brave-origin-nightly.gpg] https://brave-browser-apt-nightly.s3.brave.com/ stable main"
-apt_key = "https://brave-browser-apt-nightly.s3.brave.com/brave-browser-archive-keyring.gpg"
+packages = ["brave-browser-nightly"]
+apt_source = "deb [arch=amd64 signed-by=/etc/apt/keyrings/brave-origin-nightly.gpg] https://brave-browser-apt-nightly.s3.brave.com stable main"
+apt_key_file = "keys/brave-origin-nightly.gpg"
 notes = "Official Brave nightly APT repository; source build is not practical for Chromium."
