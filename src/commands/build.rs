@@ -54,6 +54,7 @@ pub(super) fn build_tool(
     tool_id: &str,
     commit: Option<&str>,
     dry_run: bool,
+    deploy: bool,
 ) -> Result<()> {
     let tools = crate::manifest::load_tools(&manifest.root)?;
     let tool = tools
@@ -88,5 +89,25 @@ pub(super) fn build_tool(
         outcome.inventory_path.display(),
         outcome.inventory.files.len()
     );
+    if deploy {
+        let sudo = crate::process::SudoRunner::new(crate::process::SystemRunner);
+        let files = vec![crate::deploy::DeployComponent {
+            id: outcome.component.clone(),
+            commit: outcome.commit.clone(),
+            staging_dir: outcome.staging_dir.clone(),
+            inventory: outcome.inventory.clone(),
+        }];
+        let writer = crate::deploy::SudoWriter { runner: &sudo };
+        crate::deploy::deploy_components(
+            std::path::Path::new("/"),
+            &files,
+            &[],
+            "debian",
+            &crate::state::state_path(),
+            &writer,
+            false,
+        )?;
+        println!("deployed {} to /usr/local", outcome.component);
+    }
     Ok(())
 }

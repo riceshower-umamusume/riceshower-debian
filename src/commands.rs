@@ -53,9 +53,10 @@ pub fn run(cli: Cli) -> Result<()> {
             component,
             tool,
             commit,
+            deploy,
         } => {
             if let Some(tool) = tool {
-                build_tool(&manifest, &tool, commit.as_deref(), dry_run)
+                build_tool(&manifest, &tool, commit.as_deref(), dry_run, deploy)
             } else {
                 let component = component.context("build requires a component or --tool")?;
                 build_component(&manifest, &component, commit.as_deref(), dry_run)

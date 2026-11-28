@@ -74,6 +74,9 @@ pub enum Command {
         tool: Option<String>,
         #[arg(long)]
         commit: Option<String>,
+        /// Deploy the staged tool to /usr/local after building
+        #[arg(long)]
+        deploy: bool,
     },
     /// Apply user dotfiles and detected display configuration
     Config,
