@@ -117,10 +117,10 @@ pub fn load(directory: &Path) -> Result<Vec<AppManifest>> {
                 bail!("app '{}' has an unsafe key path", app.id);
             }
         }
-        if app.kind == "appimage" && app.appimage_sha256.as_deref().is_none_or(|s| s.len()!=64 || !s.bytes().all(|b| b.is_ascii_hexdigit())) {
+        if app.kind == "appimage" && app.appimage_sha256.as_deref().map_or(true, |s| s.len()!=64 || !s.bytes().all(|b| b.is_ascii_hexdigit())) {
             bail!("app '{}' requires a valid 64-character appimage_sha256", app.id);
         }
-        if app.kind == "source" && (app.source_url.is_none() || app.git_commit.as_deref().is_none_or(|s| s.len()!=40)) {
+        if app.kind == "source" && (app.source_url.is_none() || app.git_commit.as_deref().map_or(true, |s| s.len()!=40)) {
             bail!("source app '{}' requires source_url and a full 40-character git_commit pin", app.id);
         }
         apps.push(app);
@@ -184,7 +184,6 @@ fn install_appimage(app: &AppManifest, arch: &str, dry_run: bool, runner: &dyn R
     fs::create_dir_all(&root)?;
     let dest = root.join(format!("{}.AppImage",app.id));
     run(runner,"curl",&["-fL","--retry","3",url,"-o",dest.to_str().context("invalid AppImage path")?],"downloading AppImage")?;
-    run(runner,"sha256sum",&["-c","-"],"placeholder") .ok();
     let check = runner.run_with_stdin("sha256sum",&["-c","-"],&format!("{sha}  {}\n",dest.display()))?;
     output_ok(check,"verifying AppImage SHA256")?;
     #[cfg(unix)] {
