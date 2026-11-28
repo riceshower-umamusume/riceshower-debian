@@ -133,6 +133,9 @@ impl DeployWriter for SudoWriter<'_> {
     }
 
     fn write_file(&self, path: &Path, content: &[u8], _mode: u32) -> Result<()> {
+        if let Some(parent) = path.parent() {
+            self.create_dir(parent, 0o755)?;
+        }
         let path = path.to_str().context("non-UTF-8 deploy path")?;
         let content = std::str::from_utf8(content).context("non-UTF-8 state content")?;
         self.checked_stdin("tee", &[path], content)
