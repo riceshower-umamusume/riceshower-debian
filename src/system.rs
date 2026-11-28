@@ -175,7 +175,7 @@ fn is_debian_archive_uri(uri: &str) -> bool {
         .split(':')
         .next()
         .unwrap_or_default()
-        .trim_matches(['[', ']'])
+        .trim_matches(&['[', ']'][..])
         .to_ascii_lowercase();
 
     host == "debian.org" || host.ends_with(".debian.org")
