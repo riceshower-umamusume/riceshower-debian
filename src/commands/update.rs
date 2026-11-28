@@ -12,9 +12,6 @@ pub(super) fn update_plan(
     dry_run: bool,
     latest: bool,
 ) -> Result<()> {
-    if distro.family == "nixos" {
-        bail!("NixOS updates are declarative; update the flake inputs instead");
-    }
     let version = require_supported_version(distro, os)?;
     let lock = manifest.lock()?;
     println!("update plan");

@@ -5,6 +5,7 @@ use crate::manifest::DistroManifest;
 use crate::process::Runner;
 use crate::state::{self, InstalledComponent};
 use anyhow::{bail, Context, Result};
+#[cfg(test)]
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -73,6 +74,19 @@ pub struct SudoWriter<'a> {
 }
 
 impl SudoWriter<'_> {
+    fn checked_stdin(&self, program: &str, args: &[&str], input: &str) -> Result<()> {
+        let output = self.runner.run_with_stdin(program, args, input)?;
+        if !output.success {
+            let details = if output.stderr.trim().is_empty() {
+                output.stdout.trim()
+            } else {
+                output.stderr.trim()
+            };
+            bail!("{program} failed: {details}");
+        }
+        Ok(())
+    }
+
     fn checked(&self, program: &str, args: &[&str]) -> Result<()> {
         let output = self.runner.run(program, args)?;
         if !output.success {
@@ -118,16 +132,10 @@ impl DeployWriter for SudoWriter<'_> {
         self.checked("rm", &["-f", "--", path])
     }
 
-    fn write_file(&self, path: &Path, content: &[u8], mode: u32) -> Result<()> {
-        let temporary = std::env::temp_dir().join(format!(
-            ".riceshower-debian-state.{}.tmp",
-            std::process::id()
-        ));
-        fs::write(&temporary, content)
-            .with_context(|| format!("writing {}", temporary.display()))?;
-        let result = self.install_file(&temporary, path, mode);
-        let _ = fs::remove_file(&temporary);
-        result
+    fn write_file(&self, path: &Path, content: &[u8], _mode: u32) -> Result<()> {
+        let path = path.to_str().context("non-UTF-8 deploy path")?;
+        let content = std::str::from_utf8(content).context("non-UTF-8 state content")?;
+        self.checked_stdin("tee", &[path], content)
     }
 }
 
@@ -293,12 +301,11 @@ pub fn install_packages(
     if packages.is_empty() {
         return Ok(());
     }
-    let (program, mut args): (&str, Vec<&str>) = match distro.package_manager.as_str() {
-        "apt" => ("apt-get", vec!["install", "-y", "--no-install-recommends"]),
-        "dnf" => ("dnf", vec!["install", "-y"]),
-        "pacman" => ("pacman", vec!["-S", "--needed", "--noconfirm"]),
-        other => bail!("unsupported package manager '{other}'"),
-    };
+    if distro.package_manager != "apt" {
+        bail!("unsupported package manager '{}'", distro.package_manager);
+    }
+    let (program, mut args): (&str, Vec<&str>) =
+        ("apt-get", vec!["install", "-y", "--no-install-recommends"]);
     args.extend(packages.iter().map(String::as_str));
     let output = runner.run(program, &args)?;
     if !output.success {
@@ -445,7 +452,6 @@ mod tests {
         let distro = DistroManifest {
             id: "debian-sid".to_string(),
             name: "Debian sid".to_string(),
-            family: "debian".to_string(),
             package_manager: "apt".to_string(),
             versions: Vec::new(),
             package_map: Default::default(),

@@ -150,21 +150,22 @@ pub fn check(
     selected: &[String],
     runner: &dyn Runner,
 ) -> Result<PreflightReport> {
-    let backend = Backend::from_package_manager(&distro.package_manager)?;
+    if distro.package_manager != "apt" {
+        bail!("unsupported package manager '{}'", distro.package_manager);
+    }
     let mut report = PreflightReport::default();
     for id in selected {
         let component = manifest
             .components
             .get(id)
             .with_context(|| format!("component '{id}' disappeared from the manifest"))?;
-        check_component(&mut report, &backend, distro, component, runner)?;
+        check_component(&mut report, distro, component, runner)?;
     }
     Ok(report)
 }
 
 fn check_component(
     report: &mut PreflightReport,
-    backend: &Backend,
     distro: &DistroManifest,
     component: &ComponentManifest,
     runner: &dyn Runner,
@@ -229,7 +230,7 @@ fn check_component(
                 distro.id
             )
         })?;
-        let state = backend.package_state(
+        let state = package_state(
             runner,
             package,
             requirement.min_version.as_deref(),
@@ -274,7 +275,7 @@ fn check_component(
                 distro.id
             )
         })?;
-        let state = backend.package_state(runner, package, None, None)?;
+        let state = package_state(runner, package, None, None)?;
         let status = match state.status {
             PackageStatus::Ok => CheckStatus::Ok,
             PackageStatus::Installable => CheckStatus::Installable,
@@ -478,99 +479,55 @@ impl PackageState {
     }
 }
 
-#[derive(Debug, Clone, Copy)]
-enum Backend {
-    Apt,
-    Dnf,
-    Pacman,
+fn package_state(
+    runner: &dyn Runner,
+    package: &str,
+    min_version: Option<&str>,
+    max_version: Option<&str>,
+) -> Result<PackageState> {
+    let installed = installed_apt(runner, package)?;
+    let candidate = candidate_apt(runner, package)?;
+    let installed_ok = match installed.as_deref() {
+        Some(version) => satisfies(runner, version, min_version, max_version)?,
+        None => false,
+    };
+    let candidate_ok = match candidate.as_deref() {
+        Some(version) => satisfies(runner, version, min_version, max_version)?,
+        None => false,
+    };
+    let status = if installed_ok {
+        PackageStatus::Ok
+    } else if candidate_ok {
+        PackageStatus::Installable
+    } else if installed.is_some() || candidate.is_some() {
+        PackageStatus::VersionMismatch
+    } else {
+        PackageStatus::Missing
+    };
+    Ok(PackageState {
+        installed,
+        candidate,
+        status,
+    })
 }
 
-impl Backend {
-    fn from_package_manager(name: &str) -> Result<Self> {
-        match name {
-            "apt" => Ok(Backend::Apt),
-            "dnf" | "rpm" => Ok(Backend::Dnf),
-            "pacman" => Ok(Backend::Pacman),
-            other => bail!("unsupported package manager '{other}'"),
+fn satisfies(
+    runner: &dyn Runner,
+    version: &str,
+    min_version: Option<&str>,
+    max_version: Option<&str>,
+) -> Result<bool> {
+    if let Some(min) = min_version {
+        if compare_dpkg(runner, version, min)? == Ordering::Less {
+            return Ok(false);
         }
     }
-
-    fn package_state(
-        &self,
-        runner: &dyn Runner,
-        package: &str,
-        min_version: Option<&str>,
-        max_version: Option<&str>,
-    ) -> Result<PackageState> {
-        let installed = self.installed_version(runner, package)?;
-        let candidate = self.candidate_version(runner, package)?;
-        let installed_ok = match installed.as_deref() {
-            Some(version) => self.satisfies(runner, version, min_version, max_version)?,
-            None => false,
-        };
-        let candidate_ok = match candidate.as_deref() {
-            Some(version) => self.satisfies(runner, version, min_version, max_version)?,
-            None => false,
-        };
-        let status = if installed_ok {
-            PackageStatus::Ok
-        } else if candidate_ok {
-            PackageStatus::Installable
-        } else if installed.is_some() || candidate.is_some() {
-            PackageStatus::VersionMismatch
-        } else {
-            PackageStatus::Missing
-        };
-        Ok(PackageState {
-            installed,
-            candidate,
-            status,
-        })
-    }
-
-    fn satisfies(
-        &self,
-        runner: &dyn Runner,
-        version: &str,
-        min_version: Option<&str>,
-        max_version: Option<&str>,
-    ) -> Result<bool> {
-        if let Some(min) = min_version {
-            if self.compare(runner, version, min)? == Ordering::Less {
-                return Ok(false);
-            }
-        }
-        if let Some(max) = max_version {
-            if self.compare(runner, version, max)? != Ordering::Less {
-                return Ok(false);
-            }
-        }
-        Ok(true)
-    }
-
-    fn compare(&self, runner: &dyn Runner, left: &str, right: &str) -> Result<Ordering> {
-        match self {
-            Backend::Apt => compare_dpkg(runner, left, right),
-            Backend::Dnf => compare_rpm(runner, left, right),
-            Backend::Pacman => compare_pacman(runner, left, right),
+    if let Some(max) = max_version {
+        if compare_dpkg(runner, version, max)? != Ordering::Less {
+            return Ok(false);
         }
     }
-
-    fn installed_version(&self, runner: &dyn Runner, package: &str) -> Result<Option<String>> {
-        match self {
-            Backend::Apt => installed_apt(runner, package),
-            Backend::Dnf => installed_dnf(runner, package),
-            Backend::Pacman => installed_pacman(runner, package),
-        }
-    }
-
-    fn candidate_version(&self, runner: &dyn Runner, package: &str) -> Result<Option<String>> {
-        match self {
-            Backend::Apt => candidate_apt(runner, package),
-            Backend::Dnf => candidate_dnf(runner, package),
-            Backend::Pacman => candidate_pacman(runner, package),
-        }
-    }
+    Ok(true)
 }
 
 fn installed_apt(runner: &dyn Runner, package: &str) -> Result<Option<String>> {
@@ -610,73 +567,6 @@ fn candidate_apt(runner: &dyn Runner, package: &str) -> Result<Option<String>> {
     Ok(None)
 }
 
-fn installed_dnf(runner: &dyn Runner, package: &str) -> Result<Option<String>> {
-    let output = runner.run("rpm", &["-q", "--qf", "%{VERSION}-%{RELEASE}\n", package])?;
-    if !output.success {
-        return Ok(None);
-    }
-    Ok(output
-        .stdout
-        .lines()
-        .map(str::trim)
-        .find(|line| !line.is_empty())
-        .map(str::to_string))
-}
-
-fn candidate_dnf(runner: &dyn Runner, package: &str) -> Result<Option<String>> {
-    let output = runner.run(
-        "dnf",
-        &[
-            "repoquery",
-            "--latest-limit",
-            "1",
-            "--qf",
-            "%{version}-%{release}",
-            package,
-        ],
-    )?;
-    if !output.success {
-        return Ok(None);
-    }
-    Ok(output
-        .stdout
-        .lines()
-        .map(str::trim)
-        .find(|line| !line.is_empty())
-        .map(str::to_string))
-}
-
-fn installed_pacman(runner: &dyn Runner, package: &str) -> Result<Option<String>> {
-    let output = runner.run("pacman", &["-Q", package])?;
-    if !output.success {
-        return Ok(None);
-    }
-    for line in output.stdout.lines() {
-        if let Some(version) = line.split_whitespace().nth(1) {
-            return Ok(Some(version.to_string()));
-        }
-    }
-    Ok(None)
-}
-
-fn candidate_pacman(runner: &dyn Runner, package: &str) -> Result<Option<String>> {
-    let output = runner.run("pacman", &["-Si", package])?;
-    if !output.success {
-        return Ok(None);
-    }
-    for line in output.stdout.lines() {
-        if let Some((key, value)) = line.split_once(':') {
-            if key.trim() == "Version" {
-                let value = value.trim();
-                if !value.is_empty() {
-                    return Ok(Some(value.to_string()));
-                }
-            }
-        }
-    }
-    Ok(None)
-}
-
 fn compare_dpkg(runner: &dyn Runner, left: &str, right: &str) -> Result<Ordering> {
     for (operator, ordering) in [("lt", Ordering::Less), ("eq", Ordering::Equal)] {
         let output = runner.run("dpkg", &["--compare-versions", left, operator, right])?;
@@ -688,47 +578,6 @@ fn compare_dpkg(runner: &dyn Runner, left: &str, right: &str) -> Result<Ordering
         }
     }
     Ok(Ordering::Greater)
-}
-
-fn compare_rpm(runner: &dyn Runner, left: &str, right: &str) -> Result<Ordering> {
-    validate_rpm_version(left)?;
-    validate_rpm_version(right)?;
-    let expression = format!("%{{lua: print(rpm.vercmp(\"{left}\", \"{right}\"))}}");
-    let output = runner.run("rpm", &["--eval", &expression])?;
-    if !output.success {
-        bail!("rpm --eval failed: {}", output.stderr.trim());
-    }
-    match output.stdout.trim() {
-        "-1" => Ok(Ordering::Less),
-        "0" => Ok(Ordering::Equal),
-        "1" => Ok(Ordering::Greater),
-        other => bail!("rpm.vercmp returned an unexpected value: {other}"),
-    }
-}
-
-fn validate_rpm_version(value: &str) -> Result<()> {
-    if value.is_empty()
-        || value.bytes().any(|byte| {
-            !(byte.is_ascii_alphanumeric()
-                || matches!(byte, b'+' | b'-' | b'.' | b'_' | b'~' | b':'))
-        })
-    {
-        bail!("invalid RPM version '{value}'");
-    }
-    Ok(())
-}
-
-fn compare_pacman(runner: &dyn Runner, left: &str, right: &str) -> Result<Ordering> {
-    let output = runner.run("vercmp", &[left, right])?;
-    if !output.success {
-        bail!("vercmp failed: {}", output.stderr.trim());
-    }
-    match output.stdout.trim() {
-        "-1" => Ok(Ordering::Less),
-        "0" => Ok(Ordering::Equal),
-        "1" => Ok(Ordering::Greater),
-        other => bail!("vercmp returned an unexpected value: {other}"),
-    }
 }
 
 #[cfg(test)]
@@ -791,41 +640,15 @@ mod tests {
             Ok(output(matches, "", ""))
         });
         assert_eq!(
-            Backend::Apt.compare(&runner, "1.2.3", "1.3").unwrap(),
+            compare_dpkg(&runner, "1.2.3", "1.3").unwrap(),
             Ordering::Less
         );
         assert_eq!(
-            Backend::Apt.compare(&runner, "1.3", "1.3").unwrap(),
+            compare_dpkg(&runner, "1.3", "1.3").unwrap(),
             Ordering::Equal
         );
         assert_eq!(
-            Backend::Apt.compare(&runner, "2.0", "1.3").unwrap(),
-            Ordering::Greater
-        );
-    }
-
-    #[test]
-    fn rpm_compare_parses_vercmp() {
-        let runner = FakeRunner(|program: &str, args: &[&str]| {
-            assert_eq!(program, "rpm");
-            assert_eq!(args[0], "--eval");
-            Ok(output(true, "-1\n", ""))
-        });
-        assert_eq!(
-            Backend::Dnf.compare(&runner, "1.0", "2.0").unwrap(),
-            Ordering::Less
-        );
-    }
-
-    #[test]
-    fn pacman_compare_parses_vercmp() {
-        let runner = FakeRunner(|program: &str, args: &[&str]| {
-            assert_eq!(program, "vercmp");
-            assert_eq!(args, &["1.0", "2.0"][..]);
-            Ok(output(true, "1\n", ""))
-        });
-        assert_eq!(
-            Backend::Pacman.compare(&runner, "1.0", "2.0").unwrap(),
+            compare_dpkg(&runner, "2.0", "1.3").unwrap(),
             Ordering::Greater
         );
     }
@@ -847,24 +670,18 @@ mod tests {
             other => panic!("unexpected command {other}"),
         });
 
-        let old = Backend::Apt
-            .package_state(&runner, "libfoo", Some("1.3"), None)
-            .unwrap();
+        let old = package_state(&runner, "libfoo", Some("1.3"), None).unwrap();
         assert_eq!(old.status, PackageStatus::Installable);
         assert!(old.detail().contains("installed 1.2.3"));
 
-        let current = Backend::Apt
-            .package_state(&runner, "libfoo", Some("1.0"), None)
-            .unwrap();
+        let current = package_state(&runner, "libfoo", Some("1.0"), None).unwrap();
         assert_eq!(current.status, PackageStatus::Ok);
 
         let missing_runner = FakeRunner(|program: &str, _args: &[&str]| match program {
             "dpkg-query" | "apt-cache" => Ok(output(false, "", "not found")),
             other => panic!("unexpected command {other}"),
         });
-        let missing = Backend::Apt
-            .package_state(&missing_runner, "libmissing", None, None)
-            .unwrap();
+        let missing = package_state(&missing_runner, "libmissing", None, None).unwrap();
         assert_eq!(missing.status, PackageStatus::Missing);
         assert!(missing.detail().contains("not found"));
 
@@ -877,9 +694,8 @@ mod tests {
             }
             other => panic!("unexpected command {other}"),
         });
-        let installed_only = Backend::Apt
-            .package_state(&installed_only_runner, "libfoo", Some("1.0"), None)
-            .unwrap();
+        let installed_only =
+            package_state(&installed_only_runner, "libfoo", Some("1.0"), None).unwrap();
         assert_eq!(installed_only.status, PackageStatus::Ok);
         assert!(installed_only.detail().contains("installed 1.2.3"));
     }

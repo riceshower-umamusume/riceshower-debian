@@ -198,7 +198,7 @@ Giai đoạn 0 (rà lại build_tools), không phải dependency link.
 ## 5. Bước tiếp theo
 
 1. Đã encode bảng trên vào `build_requirements` của manifest và validate khi load.
-2. Đã có preflight APT/DNF/pacman, pkg-config và compiler; xem `src/preflight.rs` và
+2. Đã có preflight APT, pkg-config và compiler; xem `src/preflight.rs` và
    Giai đoạn 1 trong roadmap.
 3. Tiếp theo: source acquisition/build/staging và xác minh package/version trên
    container/VM của từng distro.

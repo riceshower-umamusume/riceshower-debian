@@ -3,7 +3,7 @@ use crate::cli::{Cli, Command};
 use crate::distro;
 use crate::manifest::{self, DistroManifest, Manifest};
 use crate::process::SystemRunner;
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result};
 mod build;
 mod config;
 mod doctor;
@@ -118,8 +118,6 @@ pub fn run(cli: Cli) -> Result<()> {
             let distro = require_distro(&manifest, &distro_id)?;
             uninstall_plan(distro, dry_run, purge)
         }
-        Command::SelfUpdate => stub("self-update", dry_run),
-        Command::Adopt => stub("adopt", dry_run),
     }
 }
 
@@ -146,13 +144,4 @@ fn list_components(manifest: &Manifest) -> Result<()> {
         }
     }
     Ok(())
-}
-
-fn stub(name: &str, dry_run: bool) -> Result<()> {
-    if dry_run {
-        println!("{name}: dry-run stub");
-        Ok(())
-    } else {
-        bail!("{name} is not implemented in this scaffold")
-    }
 }

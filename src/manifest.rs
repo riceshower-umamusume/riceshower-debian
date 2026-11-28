@@ -66,7 +66,6 @@ fn default_true() -> bool {
 pub struct DistroManifest {
     pub id: String,
     pub name: String,
-    pub family: String,
     pub package_manager: String,
     pub versions: Vec<DistroVersion>,
     #[serde(default)]
@@ -308,7 +307,6 @@ fn load_distros(root: &Path, ids: &[String]) -> Result<BTreeMap<String, DistroMa
             );
         }
         if distro.name.trim().is_empty()
-            || distro.family.trim().is_empty()
             || distro.package_manager.trim().is_empty()
             || distro.versions.is_empty()
         {

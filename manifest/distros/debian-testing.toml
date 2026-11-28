@@ -1,6 +1,5 @@
 id = "debian-testing"
 name = "Debian testing"
-family = "debian"
 package_manager = "apt"
 
 [[versions]]

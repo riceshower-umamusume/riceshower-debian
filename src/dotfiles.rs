@@ -106,9 +106,21 @@ pub fn apply(root: &Path, home: &Path, dry_run: bool) -> Result<()> {
             None
         };
 
+        let mode = fs::metadata(&target)
+            .ok()
+            .map(|metadata| metadata.permissions())
+            .or_else(|| {
+                fs::metadata(&source)
+                    .ok()
+                    .map(|metadata| metadata.permissions())
+            });
         let content = fs::read(&source).with_context(|| format!("reading {}", source.display()))?;
         atomic_file::write(&target, &content)
             .with_context(|| format!("writing {}", target.display()))?;
+        if let Some(mode) = mode {
+            fs::set_permissions(&target, mode)
+                .with_context(|| format!("preserving permissions on {}", target.display()))?;
+        }
         state.files.insert(
             file.id.clone(),
             InstalledDotfile {

@@ -1,6 +1,5 @@
 id = "debian-sid"
 name = "Debian sid"
-family = "debian"
 package_manager = "apt"
 
 [[versions]]

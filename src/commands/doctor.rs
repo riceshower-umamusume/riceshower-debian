@@ -22,10 +22,7 @@ pub(super) fn doctor(
     );
     println!("detected distro: {distro_id}");
     if let Some(distro) = distro {
-        println!(
-            "family: {} | package manager: {}",
-            distro.family, distro.package_manager
-        );
+        println!("package manager: {}", distro.package_manager);
         match matching_version(distro, os) {
             Some(version) => println!("matched version: {} (tier {})", version.id, version.tier),
             None => println!(
@@ -63,9 +60,7 @@ pub(super) fn doctor(
                 );
             }
         }
-        if distro.family == "nixos" {
-            println!("preflight: skipped (NixOS declarative)");
-        } else if matching_version(distro, os).is_some() {
+        if matching_version(distro, os).is_some() {
             match resolve_install_plan(manifest, distro, &[], false) {
                 Ok(resolved) => {
                     match preflight::check(manifest, distro, &resolved.components, &SystemRunner) {

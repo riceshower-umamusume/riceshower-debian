@@ -1,9 +1,9 @@
 use crate::process::Runner;
-use anyhow::{Context, Result};
+use anyhow::Result;
 use std::fs;
 use std::path::Path;
 
-const DROP_IN: &str = "/etc/systemd/resolved.conf.d/90-riceshower-debian.conf";
+pub const DROP_IN: &str = "/etc/systemd/resolved.conf.d/90-riceshower-debian.conf";
 
 pub fn nameservers() -> Vec<String> {
     let content = fs::read_to_string("/run/systemd/resolve/resolv.conf")
@@ -60,10 +60,6 @@ pub fn apply(runner: &dyn Runner, dry_run: bool) -> Result<()> {
     }
     println!("dns: {DROP_IN} -> {}", servers.join(", "));
     Ok(())
-}
-
-pub fn read_systemd() -> Result<String> {
-    fs::read_to_string(DROP_IN).with_context(|| format!("reading {DROP_IN}"))
 }
 
 #[cfg(test)]

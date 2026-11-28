@@ -57,8 +57,6 @@ pub enum Command {
         #[arg(long)]
         purge: bool,
     },
-    /// Update the noctalia-setup executable
-    SelfUpdate,
     /// Build and stage one component from the lockfile
     Build {
         component: String,
@@ -75,6 +73,4 @@ pub enum Command {
     InstallApp { id: String },
     /// List components from the manifest
     ListComponents,
-    /// Adopt an installation created by the legacy scripts
-    Adopt,
 }

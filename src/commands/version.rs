@@ -86,7 +86,6 @@ mod tests {
         DistroManifest {
             id: "example".to_string(),
             name: "Example".to_string(),
-            family: "debian".to_string(),
             package_manager: "apt".to_string(),
             versions,
             package_map: BTreeMap::new(),
@@ -189,9 +188,9 @@ mod tests {
     }
 
     #[test]
-    fn caramos_version_is_detected_from_pretty_name() {
+    fn version_is_detected_from_pretty_name() {
         let distro = distro(vec![version("1.5", false, None)]);
-        let os = BTreeMap::from([("PRETTY_NAME".to_string(), "CaramOS 1.5.1".to_string())]);
+        let os = BTreeMap::from([("PRETTY_NAME".to_string(), "Example 1.5.1".to_string())]);
         assert_eq!(matching_version(&distro, &os).unwrap().id, "1.5");
     }
 

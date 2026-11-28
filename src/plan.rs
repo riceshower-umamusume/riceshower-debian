@@ -187,9 +187,6 @@ mod tests {
     fn every_imperative_distro_resolves_all_declared_dependencies() {
         let manifest = repository_manifest();
         for distro in manifest.distros.values() {
-            if distro.family == "nixos" {
-                continue;
-            }
             resolve_install_plan(&manifest, distro, &[], false)
                 .unwrap_or_else(|error| panic!("{}: {error:#}", distro.id));
         }

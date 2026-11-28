@@ -29,9 +29,6 @@ pub(super) fn install_plan(
     dotfiles_dir: &Path,
     options: InstallOptions<'_>,
 ) -> Result<()> {
-    if distro.family == "nixos" {
-        bail!("NixOS is managed declaratively; import nixosModules.default from the flake instead of running install");
-    }
     let version = require_supported_version(distro, os)?;
     let resolved = resolve_install_plan(manifest, distro, options.requested, options.no_greeter)?;
     println!("install plan");

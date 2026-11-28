@@ -124,28 +124,8 @@ pub fn detect_distro(values: &BTreeMap<String, String>) -> String {
         .map(String::as_str)
         .unwrap_or_default()
         .to_ascii_lowercase();
-    let name = format!(
-        "{} {}",
-        values.get("NAME").map(String::as_str).unwrap_or_default(),
-        values
-            .get("PRETTY_NAME")
-            .map(String::as_str)
-            .unwrap_or_default()
-    )
-    .to_ascii_lowercase();
-
-    if id == "caramos" || name.contains("caramos") {
-        return "caramos".to_string();
-    }
-
     match id.as_str() {
-        "cachyos" => "cachyos",
-        "linuxmint" | "mint" => "mint",
-        "ubuntu" => "ubuntu",
         "debian" => debian_suite(values),
-        "fedora" => "fedora",
-        "arch" => "arch",
-        "nixos" => "nixos",
         "" => "unknown",
         other => other,
     }
@@ -157,14 +137,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parses_quoted_and_unquoted_values() {
-        let values = parse_os_release("NAME=\"CaramOS\"\nID=linuxmint\nID_LIKE='ubuntu'\n");
-        assert_eq!(values["NAME"], "CaramOS");
-        assert_eq!(values["ID"], "linuxmint");
-        assert_eq!(values["ID_LIKE"], "ubuntu");
-    }
-
-    #[test]
     fn detects_debian_suites() {
         let stable = parse_os_release("ID=debian\nVERSION_ID=13\nVERSION_CODENAME=trixie\n");
         assert_eq!(detect_distro(&stable), "debian-stable");
@@ -174,41 +146,5 @@ mod tests {
         assert_eq!(detect_distro(&sid), "debian-sid");
         let testing_apt = parse_os_release("ID=debian\nVERSION_ID=14\nVERSION_CODENAME=forky\nPRETTY_NAME=\"Debian GNU/Linux forky/sid\"\nDEBIAN_SUITE=testing\n");
         assert_eq!(detect_distro(&testing_apt), "debian-testing");
-    }
-
-    #[test]
-    fn detects_caramos_before_mint() {
-        let values = parse_os_release(
-            "NAME=\"CaramOS\"\nID=linuxmint\nID_LIKE=ubuntu\nPRETTY_NAME=\"CaramOS 1.5.1\"\n",
-        );
-        assert_eq!(detect_distro(&values), "caramos");
-    }
-
-    #[test]
-    fn detects_cachyos_before_arch() {
-        let values = parse_os_release("ID=cachyos\nID_LIKE=arch\n");
-        assert_eq!(detect_distro(&values), "cachyos");
-    }
-
-    #[test]
-    fn detects_mint_and_ubuntu() {
-        let mint = parse_os_release("ID=linuxmint\nID_LIKE=ubuntu\n");
-        assert_eq!(detect_distro(&mint), "mint");
-        let ubuntu = parse_os_release("ID=ubuntu\nID_LIKE=debian\n");
-        assert_eq!(detect_distro(&ubuntu), "ubuntu");
-    }
-
-    #[test]
-    fn does_not_promote_unsupported_derivatives() {
-        for (id, like) in [
-            ("endeavouros", "arch"),
-            ("manjaro", "arch"),
-            ("pop", "ubuntu"),
-            ("kali", "debian"),
-            ("nobara", "fedora"),
-        ] {
-            let values = parse_os_release(&format!("ID={id}\nID_LIKE={like}\n"));
-            assert_eq!(detect_distro(&values), id);
-        }
     }
 }

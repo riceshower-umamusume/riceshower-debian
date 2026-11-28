@@ -4,6 +4,14 @@ set -Eeuo pipefail
 ROOT=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 CARGO=${CARGO:-}
 
+if [[ ${EUID} -eq 0 ]]; then
+  if [[ -n ${SUDO_USER:-} && ${SUDO_USER} != root ]]; then
+    exec sudo -u "$SUDO_USER" -H -- "$0" "$@"
+  fi
+  printf 'Do not run this installer as root. Run it as your normal user; it uses sudo only for packages and /usr/local.\n' >&2
+  exit 1
+fi
+
 if [[ -x "$ROOT/target/release/noctalia-setup" ]]; then
   exec "$ROOT/target/release/noctalia-setup" --manifest-dir "$ROOT/manifest" --dotfiles-dir "$ROOT/dotfiles" --apps-dir "$ROOT/apps" "$@"
 fi
