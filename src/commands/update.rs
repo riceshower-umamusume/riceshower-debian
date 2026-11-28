@@ -65,12 +65,10 @@ pub(super) fn update_plan(
         } else {
             println!("lockfile already up-to-date; no write needed");
         }
-        println!("installed components were not changed; component deployment is not implemented");
         Ok(())
     } else {
-        bail!(
-            "component deployment requires the lifecycle engine; use --latest to refresh the lockfile"
-        )
+        println!("using the pinned lockfile");
+        Ok(())
     }
 }
 

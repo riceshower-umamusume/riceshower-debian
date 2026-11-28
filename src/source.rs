@@ -10,7 +10,7 @@ use std::time::Duration;
 static TEMP_SEQUENCE: AtomicU64 = AtomicU64::new(0);
 
 pub fn resolve_commit(repository: &str, git_ref: &str) -> Result<String> {
-    validate_github_repository(repository)?;
+    validate_repository(repository)?;
     validate_branch_name(git_ref)?;
 
     let expected_ref = format!("refs/heads/{git_ref}");
@@ -39,7 +39,7 @@ pub fn resolve_commit(repository: &str, git_ref: &str) -> Result<String> {
     parse_ls_remote(&stdout, &expected_ref)
 }
 
-fn validate_github_repository(repository: &str) -> Result<()> {
+fn validate_repository(repository: &str) -> Result<()> {
     let rest = repository
         .strip_prefix("https://")
         .context("component repository must use an https:// URL")?;
@@ -106,7 +106,7 @@ pub fn acquire_component(
     commit: &str,
     runner: &dyn Runner,
 ) -> Result<PathBuf> {
-    validate_github_repository(&component.repo)?;
+    validate_repository(&component.repo)?;
     fetch_snapshot(
         runner,
         &component.repo,
@@ -117,14 +117,7 @@ pub fn acquire_component(
 }
 
 pub fn cache_root() -> Result<PathBuf> {
-    if let Some(path) = std::env::var_os("XDG_CACHE_HOME") {
-        let path = PathBuf::from(path);
-        if path.is_absolute() {
-            return Ok(path.join("noctalia-setup"));
-        }
-    }
-    let home = std::env::var_os("HOME").context("HOME is not set")?;
-    Ok(PathBuf::from(home).join(".cache/noctalia-setup"))
+    Ok(crate::xdg::cache_home()?.join("noctalia-setup"))
 }
 
 fn fetch_snapshot(
@@ -341,13 +334,11 @@ mod tests {
 
     #[test]
     fn only_accepts_public_github_repository_urls() {
-        assert!(validate_github_repository("https://github.com/noctalia-dev/umbriel").is_ok());
-        assert!(validate_github_repository("https://github.com/noctalia-dev/umbriel.git").is_ok());
-        assert!(validate_github_repository("file:///tmp/umbriel").is_err());
-        assert!(validate_github_repository("https://example.com/noctalia-dev/umbriel").is_err());
-        assert!(
-            validate_github_repository("https://github.com/noctalia-dev/umbriel/extra").is_err()
-        );
+        assert!(validate_repository("https://github.com/noctalia-dev/umbriel").is_ok());
+        assert!(validate_repository("https://github.com/noctalia-dev/umbriel.git").is_ok());
+        assert!(validate_repository("file:///tmp/umbriel").is_err());
+        assert!(validate_repository("https://example.com/noctalia-dev/umbriel").is_err());
+        assert!(validate_repository("https://github.com/noctalia-dev/umbriel/extra").is_err());
     }
 
     #[test]

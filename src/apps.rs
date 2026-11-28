@@ -1,6 +1,7 @@
 use crate::process::Runner;
 use anyhow::{bail, Context, Result};
 use serde::Deserialize;
+use std::collections::BTreeSet;
 use std::fs;
 use std::path::Path;
 
@@ -35,6 +36,7 @@ fn validate_id(id: &str) -> Result<()> {
 
 pub fn load(directory: &Path) -> Result<Vec<AppManifest>> {
     let mut apps = Vec::new();
+    let mut seen = BTreeSet::new();
     let entries = fs::read_dir(directory)
         .with_context(|| format!("reading app catalog {}", directory.display()))?;
     for entry in entries {
@@ -48,6 +50,9 @@ pub fn load(directory: &Path) -> Result<Vec<AppManifest>> {
         let app: AppManifest =
             toml::from_str(&content).with_context(|| format!("parsing {}", path.display()))?;
         validate_id(&app.id)?;
+        if !seen.insert(app.id.clone()) {
+            bail!("duplicate app id '{}'", app.id);
+        }
         if let Some(key) = &app.apt_key_file {
             let key = Path::new(key);
             if key.is_absolute()

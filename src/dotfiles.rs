@@ -2,7 +2,7 @@ use crate::atomic_file;
 use anyhow::{bail, Context, Result};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Component as PathComponent, Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -45,11 +45,15 @@ pub fn load(root: &Path) -> Result<DotfilesManifest> {
     if manifest.schema != 1 {
         bail!("unsupported dotfiles manifest schema {}", manifest.schema);
     }
+    let mut seen = BTreeSet::new();
     for file in &manifest.files {
         validate_relative(&file.source)
             .with_context(|| format!("dotfile '{}' source is unsafe", file.id))?;
         validate_relative(&file.target)
             .with_context(|| format!("dotfile '{}' target is unsafe", file.id))?;
+        if !seen.insert(file.id.clone()) {
+            bail!("duplicate dotfile id '{}'", file.id);
+        }
     }
     Ok(manifest)
 }
@@ -170,14 +174,7 @@ pub fn write_display(home: &Path, content: &str, dry_run: bool) -> Result<()> {
 }
 
 pub fn state_path() -> Result<PathBuf> {
-    if let Some(path) = std::env::var_os("XDG_STATE_HOME") {
-        let path = PathBuf::from(path);
-        if path.is_absolute() {
-            return Ok(path.join("riceshower-debian/dotfiles.toml"));
-        }
-    }
-    let home = std::env::var_os("HOME").context("HOME is not set")?;
-    Ok(PathBuf::from(home).join(".local/state/riceshower-debian/dotfiles.toml"))
+    Ok(crate::xdg::state_home()?.join("riceshower-debian/dotfiles.toml"))
 }
 
 fn load_state(path: &Path) -> Result<DotfilesState> {

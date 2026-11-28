@@ -23,7 +23,8 @@ pub(super) fn doctor(
     println!("detected distro: {distro_id}");
     if let Some(distro) = distro {
         println!("package manager: {}", distro.package_manager);
-        match matching_version(distro, os) {
+        let matched = matching_version(distro, os);
+        match matched {
             Some(version) => println!("matched version: {} (tier {})", version.id, version.tier),
             None => println!(
                 "matched version: none; supported: {}",
@@ -60,7 +61,7 @@ pub(super) fn doctor(
                 );
             }
         }
-        if matching_version(distro, os).is_some() {
+        if matched.is_some() {
             match resolve_install_plan(manifest, distro, &[], false) {
                 Ok(resolved) => {
                     match preflight::check(manifest, distro, &resolved.components, &SystemRunner) {

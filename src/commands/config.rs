@@ -2,12 +2,12 @@ use crate::dns;
 use crate::dotfiles;
 use crate::hardware;
 use crate::process::SystemRunner;
-use anyhow::{Context, Result};
+use anyhow::Result;
 use std::path::Path;
 
 pub(super) fn config(dotfiles_dir: &Path, dry_run: bool) -> Result<()> {
-    let home = std::env::var_os("HOME").context("HOME is not set")?;
-    let home = Path::new(&home);
+    let home = crate::xdg::home()?;
+    let home = home.as_path();
     let detected = hardware::detect(&SystemRunner)?;
     println!("hardware: gpu={}", detected.gpu);
     for output in &detected.outputs {
