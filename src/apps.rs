@@ -62,6 +62,25 @@ pub fn install(directory: &Path, id: &str, dry_run: bool, runner: &dyn Runner) -
         return Ok(());
     }
     if let Some(source) = &app.apt_source {
+        let output = runner.run(
+            "sudo",
+            &[
+                "--",
+                "apt-get",
+                "install",
+                "-y",
+                "--no-install-recommends",
+                "gpg",
+                "curl",
+                "ca-certificates",
+            ],
+        )?;
+        if !output.success {
+            bail!(
+                "installing apt key prerequisites failed: {}",
+                output.stderr.trim()
+            );
+        }
         let list = format!("/etc/apt/sources.list.d/noctalia-{}.list", app.id);
         let output =
             runner.run_with_stdin("sudo", &["--", "tee", &list], &format!("{source}\n"))?;
