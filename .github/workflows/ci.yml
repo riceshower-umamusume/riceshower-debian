@@ -41,5 +41,6 @@ jobs:
       - run: apt-get update && apt-get install -y curl ca-certificates build-essential pkg-config git
       - run: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
       - run: . "$HOME/.cargo/env" && cargo fmt --all -- --check && cargo clippy --all-targets -- -D warnings && cargo test --all && cargo build --release
-      - run: . "$HOME/.cargo/env" && ./install.sh list-components
-      - run: . "$HOME/.cargo/env" && ./install.sh install --dry-run || true
+      - run: useradd -m ci && chown -R ci:ci .
+      - run: su ci -c 'cd "$GITHUB_WORKSPACE" && ./install.sh list-components'
+      - run: su ci -c 'cd "$GITHUB_WORKSPACE" && ./install.sh install --dry-run || true'
