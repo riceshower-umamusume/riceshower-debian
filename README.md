@@ -14,7 +14,7 @@ private `/opt/noctalia/deps` libraries.
 - `update [--latest]` refreshes the lockfile and redeploys.
 - `repair` reruns the pinned install plan.
 - `uninstall [--purge]` removes state-recorded files and optionally packages.
-- `list-apps` / `install-app <id>` use the app catalog with apt source/key support.
+- `list-apps` / `install-app <id>` support APT, pinned Git/source builds, Cargo, per-user Flatpak and checksum-verified AppImage; architecture is detected with dpkg and successful app installs are recorded in `~/.local/state/noctalia-setup/apps.toml`.
 
 # riceshower-debian
 
@@ -90,7 +90,7 @@ cargo clippy --all-targets -- -D warnings
 `install` without `--dry-run` still stops before deployment. The build command fetches
 the locked source and stages it under `~/.cache/noctalia-setup` without changing the host.
 
-## Upgrade stable/testing to Sid
+## App catalog backends\n\nSee [docs/app-catalog.md](docs/app-catalog.md) for TOML schemas and examples for APT, Git/source, Cargo, Flatpak and AppImage. Source apps require a full commit SHA; AppImages require a SHA-256 digest.\n\n## Upgrade stable/testing to Sid
 
 Sid and unstable are the same Debian branch: `unstable` is the suite, `sid` is
 the codename. The script below follows Method 2 of the AtulHost guide, adapted
