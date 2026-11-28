@@ -78,6 +78,7 @@ Các mục còn lại: app build-from-source, login/greeter thật, release có 
 - [x] Steam/gamescope/MangoHud/GameMode/Lutris/Wine/i386 Mesa-Vulkan.
 - [x] zsh + starship + autosuggestions + syntax-highlighting + fzf/eza/bat/fd/rg/zoxide.
 - [x] Starship build từ source bằng cargo vào `/usr/local`; dotfiles zsh/starship/MangoHud.
-- [ ] Verify full gaming/terminal install trên VM sid/testing/stable.
+- [x] Verify full gaming/terminal install trên VM sid; dry-run stable/testing.
+- [ ] Verify full gaming/terminal install trên VM stable/testing.
 - [ ] Source recipe cho gamescope/MangoHud/GameMode.
 - [ ] Steam first-run, 32-bit Vulkan và GPU vendor trên máy thật.
