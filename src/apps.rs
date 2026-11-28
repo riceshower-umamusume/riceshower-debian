@@ -120,7 +120,7 @@ pub fn load(directory: &Path) -> Result<Vec<AppManifest>> {
         if app.kind == "appimage" && app.appimage_sha256.as_deref().map_or(true, |s| s.len()!=64 || !s.bytes().all(|b| b.is_ascii_hexdigit())) {
             bail!("app '{}' requires a valid 64-character appimage_sha256", app.id);
         }
-        if app.kind == "source" && (app.source_url.is_none() || app.git_commit.as_deref().map_or(true, |s| s.len()!=40)) {
+        if app.kind == "source" && (app.source_url.is_none() || app.git_commit.as_deref().map_or(true, |s| s.len()!=40 || !s.bytes().all(|b| b.is_ascii_hexdigit())) || app.build_command.is_empty() || app.install_command.is_empty()) {
             bail!("source app '{}' requires source_url and a full 40-character git_commit pin", app.id);
         }
         apps.push(app);
@@ -154,7 +154,10 @@ fn install_apt(directory: &Path, app: &AppManifest, arch: &str, dry_run: bool, r
     let mut args = vec!["--","apt-get","install","-y","--no-install-recommends"];
     args.extend(packages.iter().map(String::as_str));
     run(runner,"sudo",&args,"installing APT application")?;
-    Ok("apt-managed".into())
+    let mut query = vec!["-W", "-f=${binary:Package}=${Version}"];
+    query.extend(packages.iter().map(String::as_str));
+    let versions = run(runner,"dpkg-query",&query,"recording installed APT package versions")?;
+    Ok(versions.trim().replace('\n', ", "))
 }
 fn install_cargo(app: &AppManifest, arch: &str, dry_run: bool, runner: &dyn Runner) -> Result<String> {
     let url = app.source_url.as_deref().context("cargo app requires source_url")?;
