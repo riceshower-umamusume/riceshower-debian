@@ -2,6 +2,7 @@ use crate::process::Runner;
 use crate::profile::ResolvedProfiles;
 use anyhow::{Context, Result};
 use std::fs;
+use std::path::{Path, PathBuf};
 
 const APT_SOURCES_LIST: &str = "/etc/apt/sources.list";
 const APT_SOURCES_DIR: &str = "/etc/apt/sources.list.d";
