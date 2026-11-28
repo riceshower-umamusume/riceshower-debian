@@ -108,6 +108,14 @@ disable_debian_sources() {
   for file in /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list; do
     [[ -f $file ]] || continue
     is_debian_source "$file" || continue
+
+    # A previous cleanup pass must never remove the Sid source we just wrote.
+    # Keep Sid-only entries; remove Stable/mixed Debian entries as before.
+    if has_sid_source "$file" && ! has_stable_source "$file"; then
+      echo "preserved Sid source: $file"
+      continue
+    fi
+
     base=$(basename "$file")
     install -m 600 "$file" "$backup/$base"
     rm -f "$file"
@@ -115,12 +123,16 @@ disable_debian_sources() {
   done
 }
 
-disable_debian_sources
-cat > /etc/apt/sources.list <<'SOURCES'
+write_sid_source() {
+  cat > /etc/apt/sources.list <<'SOURCES'
 # Debian Sid; third-party sources stay in /etc/apt/sources.list.d/
 deb http://deb.debian.org/debian sid main contrib non-free non-free-firmware
 SOURCES
-chmod 644 /etc/apt/sources.list
+  chmod 644 /etc/apt/sources.list
+}
+
+disable_debian_sources
+write_sid_source
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
@@ -129,7 +141,14 @@ apt-get -y full-upgrade \
   -o Dpkg::Options::=--force-confold
 
 # A package or cloud-init may recreate a stable sources file during the upgrade.
+# Cleanup must preserve Sid-only entries and restore the canonical source if needed.
 disable_debian_sources
+if [[ ! -f /etc/apt/sources.list ]] \
+  || ! has_sid_source /etc/apt/sources.list \
+  || has_stable_source /etc/apt/sources.list; then
+  echo "restoring canonical Debian Sid source after upgrade cleanup"
+  write_sid_source
+fi
 apt-get update
 apt-get -y full-upgrade \
   -o Dpkg::Options::=--force-confdef \
