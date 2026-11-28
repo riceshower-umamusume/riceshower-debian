@@ -48,9 +48,7 @@ pub(super) fn wizard(
     println!("dotfiles:");
     if dry_run {
         println!("  would apply Umbriel/Noctalia/fcitx5/shell and display config");
-    } else if yes {
-        super::config::config(dotfiles_dir, false)?;
-    } else {
+    } else if !yes {
         println!("  run ./install.sh config to apply");
     }
 

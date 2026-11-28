@@ -61,14 +61,25 @@ pub(super) fn install_plan(
         }
     }
     println!("  package manager: {}", distro.package_manager);
+    let mut declared = resolved.packages.clone();
+    declared.extend(distro.private_build_packages.iter().cloned());
+    declared.extend(
+        crate::hardware::detect(&SystemRunner)?
+            .gpu
+            .recommended_packages()
+            .iter()
+            .map(|package| (*package).to_string()),
+    );
+    declared.sort();
+    declared.dedup();
     println!(
         "  declared host packages ({}): {}",
-        resolved.packages.len(),
-        resolved.packages.join(", ")
+        declared.len(),
+        declared.join(", ")
     );
     if !resolved.private_dependencies.is_empty() {
         println!(
-            "  private build dependencies (not installed by this command): {}",
+            "  private build dependencies (built from source to /opt/noctalia/deps): {}",
             resolved.private_dependencies.join(", ")
         );
     }
@@ -78,7 +89,10 @@ pub(super) fn install_plan(
         if report.has_blocking() {
             println!("dry-run: blocking preflight issues listed above; a real install would stop");
         }
-        println!("dry-run: would install packages, build 5 components and deploy to /usr/local, then apply dotfiles");
+        println!(
+            "dry-run: would install packages, build {} component(s) and deploy to /usr/local, then apply dotfiles",
+            resolved.components.len()
+        );
         println!("dry-run: no changes made");
         return Ok(());
     }
