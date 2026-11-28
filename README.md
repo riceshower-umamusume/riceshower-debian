@@ -90,6 +90,26 @@ cargo clippy --all-targets -- -D warnings
 `install` without `--dry-run` still stops before deployment. The build command fetches
 the locked source and stages it under `~/.cache/noctalia-setup` without changing the host.
 
+## Upgrade stable/testing to Sid
+
+Sid and unstable are the same Debian branch: `unstable` is the suite, `sid` is
+the codename. The script below follows Method 2 of the AtulHost guide, adapted
+for Debian 13 deb822 sources and the TheLinuxVault warnings (no `-security`
+suite, backup sources, verify the result):
+
+```bash
+sudo ./scripts/upgrade-to-sid.sh --dry-run
+sudo ./scripts/upgrade-to-sid.sh --yes
+sudo reboot
+```
+
+It backs up Debian source files to `/var/backups/upgrade-to-sid-<timestamp>`,
+disables old stable/testing Debian archive sources, writes
+`/etc/apt/sources.list.d/debian-unstable.sources` with
+`Suites: unstable`, runs `apt-get update` and `apt-get full-upgrade`, then
+verifies `VERSION_CODENAME=sid` and `/etc/debian_version`. Add `--reboot` to
+reboot automatically. This is one-way; back up `/home` first.
+
 ## Boot repair (BIOS and UEFI)
 
 The installer never writes the bootloader. On a fresh mini.iso install where the
