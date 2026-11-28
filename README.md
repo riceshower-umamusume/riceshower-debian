@@ -1,6 +1,6 @@
 # riceshower-debian
 
-Bộ cài đặt và quản lý hệ sinh thái **Noctalia trên Debian**, bao gồm Umbriel Wayland compositor, Noctalia Shell, portal, Luciole và Noctalia Greeter. Các component Noctalia được build từ source upstream; package hệ thống và dependency được quản lý bằng APT.
+Bộ cài đặt và quản lý hệ sinh thái **Noctalia trên Debian**, bao gồm Umbriel Wayland compositor, Noctalia Shell, portal, Luciole và Noctalia Greeter. Các component Noctalia được build từ source upstream; package hệ thống được cài bằng APT, còn một số dependency thiếu version trên Debian stable được build riêng vào `/opt/noctalia/deps`.
 
 > **Phạm vi hỗ trợ:** Debian 13 (stable / trixie), Debian 14 (testing / forky) và Debian Sid (unstable). Không hỗ trợ Ubuntu, Linux Mint, Fedora, Arch hoặc các distro khác.
 
