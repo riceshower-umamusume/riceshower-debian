@@ -49,25 +49,24 @@ has_stable_source() {
 }
 
 sid_only=1
-sid_file=0
+sid_main=0
 for file in /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list; do
   [[ -f $file ]] || continue
   is_debian_source "$file" || continue
-  base=$(basename "$file")
   if ! has_sid_source "$file" || has_stable_source "$file"; then
     sid_only=0
   fi
-  if [[ $base == sid.sources ]] && has_sid_source "$file"; then
-    sid_file=1
+  if [[ $file == /etc/apt/sources.list ]] && has_sid_source "$file"; then
+    sid_main=1
   fi
 done
 
-if [[ ${VERSION_CODENAME:-} == sid ]] && [[ $sid_only -eq 1 ]] && [[ $sid_file -eq 1 ]]; then
+if [[ ${VERSION_CODENAME:-} == sid ]] && [[ $sid_only -eq 1 ]] && [[ $sid_main -eq 1 ]]; then
   echo "already Debian Sid; nothing to do"
   exit 0
 fi
-if [[ $sid_only -eq 1 ]] && [[ $sid_file -eq 1 ]]; then
-  echo "already using /etc/apt/sources.list.d/sid.sources; nothing to do"
+if [[ $sid_only -eq 1 ]] && [[ $sid_main -eq 1 ]]; then
+  echo "already using /etc/apt/sources.list with sid; nothing to do"
   exit 0
 fi
 case ${VERSION_CODENAME:-} in
@@ -81,7 +80,8 @@ esac
 if [[ $DRY -eq 1 ]]; then
   echo "dry-run: $PRETTY_NAME"
   echo "would back up Debian source files to /var/backups/upgrade-to-sid-<timestamp>"
-  echo "would replace Debian archive sources with Suites: sid"
+  echo "would write deb http://deb.debian.org/debian sid in /etc/apt/sources.list"
+  echo "would clean Debian sources from /etc/apt/sources.list.d"
   echo "would run: apt-get update && apt-get -y full-upgrade"
   echo "would verify /etc/debian_version contains sid"
   exit 0
@@ -109,7 +109,6 @@ disable_debian_sources() {
     [[ -f $file ]] || continue
     is_debian_source "$file" || continue
     base=$(basename "$file")
-    [[ $base == sid.sources ]] && continue
     install -m 600 "$file" "$backup/$base"
     rm -f "$file"
     echo "disabled: $file"
@@ -117,14 +116,11 @@ disable_debian_sources() {
 }
 
 disable_debian_sources
-cat > /etc/apt/sources.list.d/sid.sources <<'SOURCES'
-Types: deb
-URIs: http://deb.debian.org/debian
-Suites: sid
-Components: main contrib non-free non-free-firmware
-Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+cat > /etc/apt/sources.list <<'SOURCES'
+# Debian Sid; third-party sources stay in /etc/apt/sources.list.d/
+deb http://deb.debian.org/debian sid main contrib non-free non-free-firmware
 SOURCES
-chmod 644 /etc/apt/sources.list.d/sid.sources
+chmod 644 /etc/apt/sources.list
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
