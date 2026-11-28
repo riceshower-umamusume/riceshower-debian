@@ -29,10 +29,6 @@ for arg in "$@"; do
   esac
 done
 
-if [[ ${EUID} -ne 0 ]]; then
-  exec sudo -- "$0" "$@"
-fi
-
 # shellcheck disable=SC1091
 source /etc/os-release
 if [[ ${ID:-} != debian ]]; then
@@ -64,6 +60,10 @@ if [[ $DRY -eq 1 ]]; then
   echo "would run: apt-get update && apt-get -y full-upgrade"
   echo "would verify VERSION_CODENAME=sid and /etc/debian_version contains sid"
   exit 0
+fi
+
+if [[ ${EUID} -ne 0 ]]; then
+  exec sudo -- "$0" "$@"
 fi
 
 if [[ $YES -eq 0 ]]; then
