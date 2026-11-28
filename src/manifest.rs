@@ -139,6 +139,34 @@ pub fn load_private(root: &Path) -> Result<BTreeMap<String, ComponentManifest>> 
     Ok(components)
 }
 
+pub fn load_tools(root: &Path) -> Result<BTreeMap<String, ComponentManifest>> {
+    let directory = root.join("tools");
+    if !directory.is_dir() {
+        return Ok(BTreeMap::new());
+    }
+    let mut components = BTreeMap::new();
+    let entries =
+        fs::read_dir(&directory).with_context(|| format!("reading {}", directory.display()))?;
+    for entry in entries {
+        let path = entry?.path();
+        if path.extension().and_then(|ext| ext.to_str()) != Some("toml") {
+            continue;
+        }
+        let component: ComponentManifest = read_toml(&path)?;
+        if !matches!(component.build_system.as_str(), "meson" | "cmake" | "cargo") {
+            bail!(
+                "tool '{}' uses unsupported build system '{}'",
+                component.id,
+                component.build_system
+            );
+        }
+        if components.insert(component.id.clone(), component).is_some() {
+            bail!("duplicate tool id in {}", directory.display());
+        }
+    }
+    Ok(components)
+}
+
 pub fn load(root: &Path) -> Result<Manifest> {
     let ecosystem_path = resolve_manifest_file(root, "ecosystem.toml")?;
     let ecosystem: EcosystemManifest = read_toml(&ecosystem_path)?;

@@ -7,15 +7,18 @@ use crate::preflight;
 use crate::private;
 use crate::process::SudoRunner;
 use crate::process::SystemRunner;
+use crate::profile;
 use crate::source;
 use crate::source::resolve_commit;
 use crate::state;
+use crate::system;
 use anyhow::{bail, Context, Result};
 use std::collections::BTreeMap;
 use std::path::Path;
 
 pub(super) struct InstallOptions<'a> {
     pub requested: &'a [String],
+    pub profiles: &'a [String],
     pub no_greeter: bool,
     pub latest: bool,
     pub yes: bool,
@@ -27,10 +30,12 @@ pub(super) fn install_plan(
     os: &BTreeMap<String, String>,
     dry_run: bool,
     dotfiles_dir: &Path,
+    profiles_dir: &Path,
     options: InstallOptions<'_>,
 ) -> Result<()> {
     let version = require_supported_version(distro, os)?;
     let resolved = resolve_install_plan(manifest, distro, options.requested, options.no_greeter)?;
+    let profiles = profile::resolve(profiles_dir, options.profiles)?;
     println!("install plan");
     println!(
         "  os: {}",
@@ -61,7 +66,18 @@ pub(super) fn install_plan(
         }
     }
     println!("  package manager: {}", distro.package_manager);
+    if !profiles.names.is_empty() {
+        println!("  profiles: {}", profiles.names.join(", "));
+    }
+    if !profiles.packages.is_empty() {
+        println!(
+            "  profile packages ({}): {}",
+            profiles.packages.len(),
+            profiles.packages.join(", ")
+        );
+    }
     let mut declared = resolved.packages.clone();
+    declared.extend(profiles.packages.iter().cloned());
     declared.extend(distro.private_build_packages.iter().cloned());
     declared.extend(
         crate::hardware::detect(&SystemRunner)?
@@ -83,9 +99,16 @@ pub(super) fn install_plan(
             resolved.private_dependencies.join(", ")
         );
     }
+    if !profiles.source_tools.is_empty() {
+        println!(
+            "  source tools (built from source to /usr/local): {}",
+            profiles.source_tools.join(", ")
+        );
+    }
     let report = preflight::check(manifest, distro, &resolved.components, &SystemRunner)?;
     report.print();
     if dry_run {
+        system::prepare(&profiles, &SystemRunner, true)?;
         if report.has_blocking() {
             println!("dry-run: blocking preflight issues listed above; a real install would stop");
         }
@@ -102,6 +125,8 @@ pub(super) fn install_plan(
 
     let sudo = SudoRunner::new(SystemRunner);
     let mut packages = resolved.packages.clone();
+    packages.extend(profiles.packages.iter().cloned());
+    packages.extend(system::prepare(&profiles, &sudo, false)?);
     packages.extend(distro.private_build_packages.iter().cloned());
     let hardware = crate::hardware::detect(&SystemRunner)?;
     packages.extend(
@@ -129,6 +154,43 @@ pub(super) fn install_plan(
     };
     if !resolved.private_dependencies.is_empty() {
         private::build_all(manifest, &cache, &sudo)?;
+    }
+    if !profiles.source_tools.is_empty() {
+        let tools = crate::manifest::load_tools(&manifest.root)?;
+        let order = build::build_order_components(&tools, &profiles.source_tools)?;
+        for id in order {
+            let tool = tools
+                .get(&id)
+                .with_context(|| format!("tool '{id}' disappeared"))?;
+            let commit = tool.git_ref.clone();
+            println!("building source tool {id} @ {commit}...");
+            let source_dir = source::acquire_component(tool, &commit, &SystemRunner)?;
+            let outcome = build::build_component(
+                tool,
+                &commit,
+                &source_dir,
+                &cache,
+                build::SYSTEM_PREFIX,
+                &[],
+                &SystemRunner,
+            )?;
+            let files = vec![deploy::DeployComponent {
+                id: outcome.component,
+                commit: outcome.commit,
+                staging_dir: outcome.staging_dir,
+                inventory: outcome.inventory,
+            }];
+            let writer = deploy::SudoWriter { runner: &sudo };
+            deploy::deploy_components(
+                Path::new("/"),
+                &files,
+                &packages,
+                &distro.id,
+                &state::state_path(),
+                &writer,
+                false,
+            )?;
+        }
     }
     let lock = manifest.lock()?;
     let order = build::build_order(manifest, &resolved.components)?;

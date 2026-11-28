@@ -1,0 +1,21 @@
+schema = 1
+id = "terminal"
+name = "Zsh + Starship terminal"
+packages = [
+  "zsh",
+  "starship",
+  "zsh-autosuggestions",
+  "zsh-syntax-highlighting",
+  "zsh-completions",
+  "fzf",
+  "eza",
+  "bat",
+  "fd-find",
+  "ripgrep",
+  "zoxide",
+  "cargo",
+  "rustc",
+  "btop",
+  "fastfetch",
+]
+source_tools = ["starship"]

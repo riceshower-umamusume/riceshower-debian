@@ -1,0 +1,4 @@
+schema = 1
+id = "all"
+name = "Full workstation"
+includes = ["base", "terminal", "gaming"]

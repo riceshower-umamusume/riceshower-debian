@@ -1,0 +1,22 @@
+schema = 1
+id = "gaming"
+name = "Steam and gaming"
+packages = [
+  "steam-installer",
+  "steam-devices",
+  "gamescope",
+  "mangohud",
+  "gamemode",
+  "lutris",
+  "wine",
+  "winetricks",
+  "vulkan-tools",
+  "mesa-vulkan-drivers",
+  "libvulkan1",
+  "libgl1-mesa-dri",
+  "libglx-mesa0",
+  "libgl1-mesa-dri:i386",
+  "libglx-mesa0:i386",
+]
+sources = ["contrib", "non-free"]
+multiarch = ["i386"]

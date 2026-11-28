@@ -114,3 +114,7 @@ fi
 
 . "$HOME/.local/bin/env"
 . "$HOME/.cargo/env"
+
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init bash)"
+fi

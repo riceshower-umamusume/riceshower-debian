@@ -28,6 +28,10 @@ pub struct Cli {
     #[arg(long, global = true, default_value = "apps", value_name = "DIR")]
     pub apps_dir: PathBuf,
 
+    /// Directory containing install profiles
+    #[arg(long, global = true, default_value = "profiles", value_name = "DIR")]
+    pub profiles_dir: PathBuf,
+
     #[command(subcommand)]
     pub command: Option<Command>,
 }
@@ -42,11 +46,17 @@ pub enum Command {
         greeter: bool,
         #[arg(long)]
         latest: bool,
+        /// Install profiles (default: all)
+        #[arg(long = "profile", value_delimiter = ',')]
+        profiles: Vec<String>,
     },
     /// Refresh pinned source commits; installed component deployment is not implemented
     Update {
         #[arg(long)]
         latest: bool,
+        /// Install profiles (default: all)
+        #[arg(long = "profile", value_delimiter = ',')]
+        profiles: Vec<String>,
     },
     /// Inspect the detected distro, manifest, lockfile and state
     Doctor,

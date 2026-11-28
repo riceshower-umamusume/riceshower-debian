@@ -24,6 +24,7 @@ pub fn run(cli: Cli) -> Result<()> {
     let Cli {
         manifest_dir,
         dotfiles_dir,
+        profiles_dir,
         apps_dir,
         dry_run,
         yes,
@@ -33,7 +34,14 @@ pub fn run(cli: Cli) -> Result<()> {
     let manifest = manifest::load(&manifest_dir)
         .with_context(|| format!("loading manifest from {}", manifest_dir.display()))?;
     let Some(command) = command else {
-        return wizard(&manifest, dry_run, yes, &dotfiles_dir, &apps_dir);
+        return wizard(
+            &manifest,
+            dry_run,
+            yes,
+            &dotfiles_dir,
+            &profiles_dir,
+            &apps_dir,
+        );
     };
     match command {
         Command::Config => config::config(&dotfiles_dir, dry_run),
@@ -54,6 +62,7 @@ pub fn run(cli: Cli) -> Result<()> {
             components,
             greeter,
             latest,
+            profiles,
         } => {
             let os = distro::read_os_release()?;
             let distro_id = distro::detect_distro(&os);
@@ -64,15 +73,17 @@ pub fn run(cli: Cli) -> Result<()> {
                 &os,
                 dry_run,
                 &dotfiles_dir,
+                &profiles_dir,
                 InstallOptions {
                     requested: &components,
+                    profiles: &profiles,
                     no_greeter: !greeter,
                     latest,
                     yes,
                 },
             )
         }
-        Command::Update { latest } => {
+        Command::Update { latest, profiles } => {
             let os = distro::read_os_release()?;
             let distro_id = distro::detect_distro(&os);
             let distro = require_distro(&manifest, &distro_id)?;
@@ -86,8 +97,10 @@ pub fn run(cli: Cli) -> Result<()> {
                 &os,
                 false,
                 &dotfiles_dir,
+                &profiles_dir,
                 InstallOptions {
                     requested: &[],
+                    profiles: &profiles,
                     no_greeter: true,
                     latest: false,
                     yes,
@@ -104,8 +117,10 @@ pub fn run(cli: Cli) -> Result<()> {
                 &os,
                 dry_run,
                 &dotfiles_dir,
+                &profiles_dir,
                 InstallOptions {
                     requested: &[],
+                    profiles: &[],
                     no_greeter: true,
                     latest: false,
                     yes: true,

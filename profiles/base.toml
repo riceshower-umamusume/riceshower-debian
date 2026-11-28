@@ -1,0 +1,20 @@
+schema = 1
+id = "base"
+name = "Debian base"
+packages = [
+  "firmware-linux",
+  "firmware-misc-nonfree",
+  "earlyoom",
+  "zram-tools",
+  "timeshift",
+  "build-essential",
+  "curl",
+  "wget",
+  "git",
+  "ca-certificates",
+  "gnupg",
+  "btop",
+  "fastfetch",
+]
+sources = ["contrib", "non-free"]
+microcode = true

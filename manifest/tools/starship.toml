@@ -1,0 +1,6 @@
+id = "starship"
+name = "Starship prompt"
+repo = "https://github.com/starship/starship"
+ref = "d60519607cdd67b81a84a37471c27abb0fa948a8"
+build_system = "cargo"
+artifacts = ["bin/starship"]

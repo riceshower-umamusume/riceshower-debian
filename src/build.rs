@@ -60,7 +60,7 @@ pub fn build_component(
     env: &[(String, String)],
     runner: &dyn Runner,
 ) -> Result<BuildOutcome> {
-    if !matches!(component.build_system.as_str(), "meson" | "cmake") {
+    if !matches!(component.build_system.as_str(), "meson" | "cmake" | "cargo") {
         bail!(
             "component '{}' uses unsupported build system '{}'",
             component.id,
@@ -81,7 +81,23 @@ pub fn build_component(
     reset_dir(&build_dir)?;
     reset_dir(&staging_dir)?;
 
-    if component.build_system == "meson" {
+    if component.build_system == "cargo" {
+        let prefix_dir = staging_dir.join(prefix.trim_start_matches('/'));
+        run_program(
+            runner,
+            "cargo",
+            &[
+                "install".to_string(),
+                "--path".to_string(),
+                path_string(source_dir)?,
+                "--root".to_string(),
+                path_string(&prefix_dir)?,
+                "--locked".to_string(),
+            ],
+            "cargo install",
+            env,
+        )?;
+    } else if component.build_system == "meson" {
         let setup = meson_setup_args(&build_dir, source_dir, &component.build_options, prefix)?;
         run_meson(runner, &setup, "meson setup", env)?;
 

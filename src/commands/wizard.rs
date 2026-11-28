@@ -11,6 +11,7 @@ pub(super) fn wizard(
     dry_run: bool,
     yes: bool,
     dotfiles_dir: &Path,
+    profiles_dir: &Path,
     apps_dir: &Path,
 ) -> Result<()> {
     println!("riceshower-debian wizard");
@@ -70,8 +71,10 @@ pub(super) fn wizard(
                 &os,
                 false,
                 dotfiles_dir,
+                profiles_dir,
                 super::install::InstallOptions {
                     requested: &[],
+                    profiles: &[],
                     no_greeter: true,
                     latest: false,
                     yes: true,

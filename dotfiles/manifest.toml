@@ -21,6 +21,16 @@ source = "noctalia/palettes/Catppuccin Mocha Sapphire.json"
 target = ".config/noctalia/palettes/Catppuccin Mocha Sapphire.json"
 
 [[files]]
+id = "starship-config"
+source = "starship/starship.toml"
+target = ".config/starship.toml"
+
+[[files]]
+id = "gaming-environment"
+source = "environment.d/90-gaming.conf"
+target = ".config/environment.d/90-gaming.conf"
+
+[[files]]
 id = "fcitx5-profile"
 source = "fcitx5/profile"
 target = ".config/fcitx5/profile"
