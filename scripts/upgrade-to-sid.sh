@@ -34,6 +34,9 @@ if [[ ${ID:-} != debian ]]; then
 fi
 
 is_debian_source() {
+  local base
+  base=$(basename "$1")
+  [[ $base == debian*.sources || $base == debian*.list ]] && return 0
   grep -qE 'deb\.debian\.org|security\.debian\.org|ftp\.debian\.org' "$1"
 }
 
