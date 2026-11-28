@@ -17,6 +17,8 @@ pub struct AppManifest {
     #[serde(default)]
     pub apt_key: Option<String>,
     #[serde(default)]
+    pub apt_key_file: Option<String>,
+    #[serde(default)]
     pub notes: Option<String>,
 }
 
@@ -87,7 +89,24 @@ pub fn install(directory: &Path, id: &str, dry_run: bool, runner: &dyn Runner) -
         if !output.success {
             bail!("writing {list} failed: {}", output.stderr.trim());
         }
-        if let Some(key) = &app.apt_key {
+        if let Some(key_file) = &app.apt_key_file {
+            let source = directory.join(key_file);
+            let destination = format!("/etc/apt/keyrings/{}.gpg", app.id);
+            let output = runner.run(
+                "sudo",
+                &[
+                    "--",
+                    "install",
+                    "-m",
+                    "0644",
+                    &source.display().to_string(),
+                    &destination,
+                ],
+            )?;
+            if !output.success {
+                bail!("installing app key failed: {}", output.stderr.trim());
+            }
+        } else if let Some(key) = &app.apt_key {
             let destination = format!("/etc/apt/keyrings/noctalia-{}.gpg", app.id);
             let output = runner.run(
                 "sudo",

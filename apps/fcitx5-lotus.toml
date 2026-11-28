@@ -3,6 +3,6 @@ name = "fcitx5 Lotus"
 kind = "apt"
 repo = "https://fcitx5-lotus.pages.dev/apt/forky"
 packages = ["fcitx5-lotus"]
-apt_source = "deb [signed-by=/etc/apt/keyrings/noctalia-fcitx5-lotus.gpg] https://fcitx5-lotus.pages.dev/apt/forky /"
-apt_key = "https://fcitx5-lotus.pages.dev/apt/fcitx5-lotus.gpg"
+apt_source = "deb [arch=amd64 signed-by=/etc/apt/keyrings/fcitx5-lotus.gpg] https://fcitx5-lotus.pages.dev/apt/forky forky main"
+apt_key_file = "keys/fcitx5-lotus.gpg"
 notes = "Current host package is from the upstream Lotus APT repository; source build is preferred when a stable recipe is pinned."
