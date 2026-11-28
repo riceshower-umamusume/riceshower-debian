@@ -13,6 +13,7 @@ packages = [
   "ripgrep",
   "zoxide",
   "cargo",
+  "cmake",
   "rustc",
   "btop",
   "fastfetch",
