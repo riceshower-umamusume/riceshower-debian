@@ -1,0 +1,6 @@
+id = "gamescope"
+name = "Gamescope"
+repo = "https://github.com/ValveSoftware/gamescope"
+ref = "e6674a98118ca7b098b98a3874b8f195ae1bf750"
+build_system = "meson"
+allow_submodules = true

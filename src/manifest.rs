@@ -45,6 +45,8 @@ pub struct ComponentManifest {
     pub artifacts: Vec<String>,
     #[serde(default)]
     pub layer: Option<String>,
+    #[serde(default)]
+    pub allow_submodules: bool,
 }
 
 #[derive(Debug, Clone, Deserialize)]

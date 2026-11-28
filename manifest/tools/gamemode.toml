@@ -1,0 +1,5 @@
+id = "gamemode"
+name = "GameMode"
+repo = "https://github.com/FeralInteractive/gamemode"
+ref = "c54d6d4243b0dd0afcb49f2c9836d432da171a2b"
+build_system = "meson"

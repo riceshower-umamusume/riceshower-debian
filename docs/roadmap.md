@@ -80,5 +80,7 @@ Các mục còn lại: app build-from-source, login/greeter thật, release có 
 - [x] Starship build từ source bằng cargo vào `/usr/local`; dotfiles zsh/starship/MangoHud.
 - [x] Verify full gaming/terminal install trên VM sid; dry-run stable/testing.
 - [ ] Verify full gaming/terminal install trên VM stable/testing.
-- [ ] Source recipe cho gamescope/MangoHud/GameMode.
+- [x] Source recipe pinned cho gamescope 3.17.0, MangoHud 0.8.4, GameMode 1.8.2;
+  build deps + apt fallback; test source pass trong VM sid.
+- [x] GPU detection thật trên host AMD RX 580 (RADV/Mesa 26.2.7, DP-1 144Hz).
 - [ ] Steam first-run, 32-bit Vulkan và GPU vendor trên máy thật.

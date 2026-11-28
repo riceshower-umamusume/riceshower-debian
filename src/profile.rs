@@ -108,6 +108,7 @@ mod tests {
         assert!(resolved.packages.contains(&"earlyoom".to_string()));
         assert!(resolved.microcode);
         assert!(!resolved.multiarch.is_empty());
-        assert_eq!(resolved.source_tools, vec!["starship".to_string()]);
+        assert!(resolved.source_tools.contains(&"starship".to_string()));
+        assert!(resolved.source_tools.contains(&"gamescope".to_string()));
     }
 }

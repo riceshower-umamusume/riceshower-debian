@@ -112,6 +112,7 @@ pub fn acquire_component(
         &component.repo,
         &component.id,
         commit,
+        component.allow_submodules,
         &cache_root()?,
     )
 }
@@ -125,6 +126,7 @@ fn fetch_snapshot(
     repository: &str,
     component_id: &str,
     commit: &str,
+    allow_submodules: bool,
     cache_root: &Path,
 ) -> Result<PathBuf> {
     validate_cache_segment(component_id)?;
@@ -152,7 +154,7 @@ fn fetch_snapshot(
             .with_context(|| format!("removing stale {}", temporary.display()))?;
     }
 
-    if let Err(error) = clone_commit(runner, repository, commit, &temporary) {
+    if let Err(error) = clone_commit(runner, repository, commit, allow_submodules, &temporary) {
         let _ = fs::remove_dir_all(&temporary);
         return Err(error);
     }
@@ -178,6 +180,7 @@ fn clone_commit(
     runner: &dyn Runner,
     repository: &str,
     commit: &str,
+    allow_submodules: bool,
     destination: &Path,
 ) -> Result<()> {
     fs::create_dir_all(destination)
@@ -215,7 +218,24 @@ fn clone_commit(
     verify_checkout(runner, destination, commit)?;
 
     if destination.join(".gitmodules").exists() {
-        bail!("component source declares submodules; submodules are not allowed by policy");
+        if !allow_submodules {
+            bail!("component source declares submodules; submodules are not allowed by policy");
+        }
+        run_git(
+            runner,
+            &[
+                "-C",
+                path,
+                "submodule",
+                "update",
+                "--init",
+                "--recursive",
+                "--depth",
+                "1",
+            ],
+            Duration::from_secs(600),
+            "git submodule update",
+        )?;
     }
     if let Ok(attributes) = fs::read_to_string(destination.join(".gitattributes")) {
         if attributes.lines().any(|line| line.contains("filter=lfs")) {
@@ -437,6 +457,7 @@ mod tests {
             remote.to_str().unwrap(),
             "umbriel",
             &commit,
+            false,
             &cache,
         )
         .unwrap();
@@ -451,6 +472,7 @@ mod tests {
             remote.to_str().unwrap(),
             "umbriel",
             &commit,
+            false,
             &cache,
         )
         .unwrap();
@@ -467,6 +489,7 @@ mod tests {
             remote.to_str().unwrap(),
             "umbriel",
             &commit,
+            false,
             &cache,
         )
         .unwrap();
@@ -477,6 +500,7 @@ mod tests {
             remote.to_str().unwrap(),
             "umbriel",
             &commit,
+            false,
             &cache,
         )
         .is_err());
@@ -492,6 +516,7 @@ mod tests {
             remote.to_str().unwrap(),
             "umbriel",
             &commit,
+            false,
             &cache,
         )
         .unwrap();
@@ -518,6 +543,7 @@ mod tests {
             remote.to_str().unwrap(),
             "umbriel",
             &commit,
+            false,
             &cache,
         )
         .unwrap();
@@ -538,6 +564,7 @@ mod tests {
             remote.to_str().unwrap(),
             "umbriel",
             &missing,
+            false,
             &cache,
         )
         .is_err());
@@ -559,6 +586,7 @@ mod tests {
             remote.to_str().unwrap(),
             "umbriel",
             &commit,
+            false,
             &cache,
         )
         .unwrap_err();

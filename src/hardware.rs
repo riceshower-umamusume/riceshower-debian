@@ -204,6 +204,22 @@ mod tests {
     }
 
     #[test]
+    fn detects_intel_and_nvidia_gpu_from_sysfs() {
+        for vendor in ["0x8086", "0x10de"] {
+            let directory = tempfile::tempdir().unwrap();
+            let device = directory.path().join("card0/device");
+            fs::create_dir_all(&device).unwrap();
+            fs::write(device.join("vendor"), format!("{vendor}\n")).unwrap();
+            let expected = if vendor == "0x8086" {
+                GpuVendor::Intel
+            } else {
+                GpuVendor::Nvidia
+            };
+            assert_eq!(detect_gpu(directory.path()), expected);
+        }
+    }
+
+    #[test]
     fn detects_amd_gpu_from_sysfs() {
         let directory = tempfile::tempdir().unwrap();
         let device = directory.path().join("card0/device");

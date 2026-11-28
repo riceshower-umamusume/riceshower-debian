@@ -110,7 +110,8 @@ install.sh           bootstrap wrapper
 - `base`: firmware, CPU microcode, earlyoom, zram, timeshift, build tools.
 - `terminal`: zsh, starship (source, cargo), autosuggestions, syntax highlighting,
   fzf, eza, bat, fd, ripgrep, zoxide.
-- `gaming`: Steam, gamescope, MangoHud, GameMode, Lutris, Wine, i386 Mesa/Vulkan.
+- `gaming`: Steam, Lutris, Wine, i386 Mesa/Vulkan, plus Gamescope, MangoHud and
+  GameMode built from pinned source recipes (apt packages stay as fallback).
 - `all` (default): base + terminal + gaming.
 
 `./install.sh install --dry-run --profile gaming` previews one profile. A full
@@ -121,7 +122,8 @@ Steam launch example: `gamescope -W 1920 -H 1080 -r 144 --mangoapp -- %command%`
 ## Next work
 
 1. Finish full gaming/terminal VM verification on sid/testing/stable.
-2. Add pinned source recipes for gamescope, MangoHud and GameMode.
+2. Verify the pinned Gamescope/MangoHud/GameMode source recipes on stable/testing
+   (sid source builds and tests already pass).
 3. Verify Steam first-run, 32-bit Vulkan and the GPU vendor packages on real hardware.
 4. Optional GUI front-end over the same profiles.
 

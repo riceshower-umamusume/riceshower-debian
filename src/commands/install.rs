@@ -164,32 +164,38 @@ pub(super) fn install_plan(
                 .with_context(|| format!("tool '{id}' disappeared"))?;
             let commit = tool.git_ref.clone();
             println!("building source tool {id} @ {commit}...");
-            let source_dir = source::acquire_component(tool, &commit, &SystemRunner)?;
-            let outcome = build::build_component(
-                tool,
-                &commit,
-                &source_dir,
-                &cache,
-                build::SYSTEM_PREFIX,
-                &[],
-                &SystemRunner,
-            )?;
-            let files = vec![deploy::DeployComponent {
-                id: outcome.component,
-                commit: outcome.commit,
-                staging_dir: outcome.staging_dir,
-                inventory: outcome.inventory,
-            }];
-            let writer = deploy::SudoWriter { runner: &sudo };
-            deploy::deploy_components(
-                Path::new("/"),
-                &files,
-                &packages,
-                &distro.id,
-                &state::state_path(),
-                &writer,
-                false,
-            )?;
+            let result = (|| -> Result<()> {
+                let source_dir = source::acquire_component(tool, &commit, &SystemRunner)?;
+                let outcome = build::build_component(
+                    tool,
+                    &commit,
+                    &source_dir,
+                    &cache,
+                    build::SYSTEM_PREFIX,
+                    &[],
+                    &SystemRunner,
+                )?;
+                let files = vec![deploy::DeployComponent {
+                    id: outcome.component,
+                    commit: outcome.commit,
+                    staging_dir: outcome.staging_dir,
+                    inventory: outcome.inventory,
+                }];
+                let writer = deploy::SudoWriter { runner: &sudo };
+                deploy::deploy_components(
+                    Path::new("/"),
+                    &files,
+                    &packages,
+                    &distro.id,
+                    &state::state_path(),
+                    &writer,
+                    false,
+                )?;
+                Ok(())
+            })();
+            if let Err(error) = result {
+                eprintln!("warning: source tool {id} failed; keeping the apt package: {error:#}");
+            }
         }
     }
     let lock = manifest.lock()?;
