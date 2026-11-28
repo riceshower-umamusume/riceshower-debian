@@ -307,10 +307,15 @@ pub fn install_packages(
     if distro.package_manager != "apt" {
         bail!("unsupported package manager '{}'", distro.package_manager);
     }
-    let (program, mut args): (&str, Vec<&str>) =
-        ("apt-get", vec!["install", "-y", "--no-install-recommends"]);
+    let mut args: Vec<&str> = vec![
+        "DEBIAN_FRONTEND=noninteractive",
+        "apt-get",
+        "install",
+        "-y",
+        "--no-install-recommends",
+    ];
     args.extend(packages.iter().map(String::as_str));
-    let output = runner.run(program, &args)?;
+    let output = runner.run("env", &args)?;
     if !output.success {
         let details = if output.stderr.trim().is_empty() {
             output.stdout.trim()
@@ -429,8 +434,10 @@ mod tests {
 
     impl Runner for FakePackages {
         fn run(&self, program: &str, args: &[&str]) -> Result<CommandOutput> {
-            assert_eq!(program, "apt-get");
-            assert_eq!(args[0], "install");
+            assert_eq!(program, "env");
+            assert_eq!(args[0], "DEBIAN_FRONTEND=noninteractive");
+            assert_eq!(args[1], "apt-get");
+            assert_eq!(args[2], "install");
             assert!(args.contains(&"pkg"));
             Ok(CommandOutput {
                 success: true,

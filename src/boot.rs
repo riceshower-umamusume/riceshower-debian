@@ -69,6 +69,16 @@ pub fn boot(
         return Ok(());
     }
     let sudo = SudoRunner::new(SystemRunner);
+    if !uefi {
+        let selections = format!(
+            "grub-pc grub-pc/install_devices multiselect {}\n",
+            disk.display()
+        );
+        let output = sudo.run_with_stdin("debconf-set-selections", &[], &selections)?;
+        if !output.success {
+            bail!("debconf-set-selections failed: {}", output.stderr.trim());
+        }
+    }
     deploy::install_packages(distro, &packages, &sudo)?;
     for command in &commands {
         let args: Vec<&str> = command.iter().skip(1).map(String::as_str).collect();
