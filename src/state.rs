@@ -1,3 +1,4 @@
+#[cfg(test)]
 use crate::atomic_file;
 use anyhow::{Context, Result};
 use serde::{Deserialize, Serialize};
