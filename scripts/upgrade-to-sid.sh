@@ -49,20 +49,25 @@ has_stable_source() {
 }
 
 sid_only=1
+sid_file=0
 for file in /etc/apt/sources.list /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list; do
   [[ -f $file ]] || continue
   is_debian_source "$file" || continue
+  base=$(basename "$file")
   if ! has_sid_source "$file" || has_stable_source "$file"; then
     sid_only=0
   fi
+  if [[ $base == sid.sources ]] && has_sid_source "$file"; then
+    sid_file=1
+  fi
 done
 
-if [[ ${VERSION_CODENAME:-} == sid ]] && [[ $sid_only -eq 1 ]]; then
+if [[ ${VERSION_CODENAME:-} == sid ]] && [[ $sid_only -eq 1 ]] && [[ $sid_file -eq 1 ]]; then
   echo "already Debian Sid; nothing to do"
   exit 0
 fi
-if [[ $sid_only -eq 1 ]]; then
-  echo "already using Debian Sid apt sources; nothing to do"
+if [[ $sid_only -eq 1 ]] && [[ $sid_file -eq 1 ]]; then
+  echo "already using /etc/apt/sources.list.d/sid.sources; nothing to do"
   exit 0
 fi
 case ${VERSION_CODENAME:-} in
@@ -104,7 +109,7 @@ disable_debian_sources() {
     [[ -f $file ]] || continue
     is_debian_source "$file" || continue
     base=$(basename "$file")
-    [[ $base == debian-sid.sources ]] && continue
+    [[ $base == sid.sources ]] && continue
     install -m 600 "$file" "$backup/$base"
     rm -f "$file"
     echo "disabled: $file"
@@ -112,14 +117,14 @@ disable_debian_sources() {
 }
 
 disable_debian_sources
-cat > /etc/apt/sources.list.d/debian-sid.sources <<'SOURCES'
+cat > /etc/apt/sources.list.d/sid.sources <<'SOURCES'
 Types: deb
 URIs: http://deb.debian.org/debian
 Suites: sid
 Components: main contrib non-free non-free-firmware
 Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
 SOURCES
-chmod 644 /etc/apt/sources.list.d/debian-sid.sources
+chmod 644 /etc/apt/sources.list.d/sid.sources
 
 export DEBIAN_FRONTEND=noninteractive
 apt-get update
