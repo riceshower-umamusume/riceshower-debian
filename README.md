@@ -105,8 +105,8 @@ sudo reboot
 
 It backs up Debian source files to `/var/backups/upgrade-to-sid-<timestamp>`,
 disables old stable/testing Debian archive sources, writes
-`/etc/apt/sources.list.d/debian-unstable.sources` with
-`Suites: unstable`, runs `apt-get update` and `apt-get full-upgrade`, then
+`/etc/apt/sources.list.d/debian-sid.sources` with
+`Suites: sid`, runs `apt-get update` and `apt-get full-upgrade`, then
 verifies `VERSION_CODENAME=sid` and `/etc/debian_version`. Add `--reboot` to
 reboot automatically. This is one-way; back up `/home` first.
 
