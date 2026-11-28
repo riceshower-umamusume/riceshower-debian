@@ -46,8 +46,8 @@ case ${VERSION_CODENAME:-} in
     exit 1
     ;;
 esac
-if [[ ${VERSION:-} == *sid* || ${VERSION:-} == *unstable* ]]; then
-  echo "already Debian Sid/unstable; nothing to do"
+if grep -RqsE '^Suites:.*\b(sid|unstable)\b|^[[:space:]]*deb[[:space:]].*[[:space:]](sid|unstable)([[:space:]]|$)' /etc/apt/sources.list /etc/apt/sources.list.d 2>/dev/null; then
+  echo "already using Debian Sid/unstable apt sources; nothing to do"
   exit 0
 fi
 
