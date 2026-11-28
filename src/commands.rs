@@ -76,7 +76,7 @@ pub fn run(cli: Cli) -> Result<()> {
             let os = distro::read_os_release()?;
             let distro_id = distro::detect_distro(&os);
             let distro = require_distro(&manifest, &distro_id)?;
-            update_plan(&manifest, distro, &os, dry_run, latest)?;
+            update_plan(&manifest, distro, &os, dry_run, latest, true)?;
             if dry_run {
                 return Ok(());
             }

@@ -1,5 +1,6 @@
 use super::version::require_supported_version;
 use crate::manifest::{DistroManifest, EcosystemLock, Manifest};
+use crate::plan::resolve_install_plan;
 use crate::source::resolve_commit;
 use anyhow::{bail, Context, Result};
 use std::collections::BTreeMap;
@@ -11,8 +12,10 @@ pub(super) fn update_plan(
     os: &BTreeMap<String, String>,
     dry_run: bool,
     latest: bool,
+    no_greeter: bool,
 ) -> Result<()> {
     let version = require_supported_version(distro, os)?;
+    let plan = resolve_install_plan(manifest, distro, &[], no_greeter)?;
     let lock = manifest.lock()?;
     println!("update plan");
     println!("  distro: {} ({})", distro.name, distro.id);
@@ -32,7 +35,7 @@ pub(super) fn update_plan(
         None
     };
 
-    for id in &manifest.ecosystem.components {
+    for id in &plan.components {
         let pinned = &lock.components[id].commit;
         if let Some(updated) = &resolved {
             let remote = &updated.components[id].commit;
