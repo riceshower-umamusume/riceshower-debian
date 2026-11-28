@@ -76,6 +76,8 @@ install on a fresh Debian sid VM.
 9. `src/apps.rs` / `src/dotfiles.rs` — duplicate ids accepted; now rejected.
 10. `src/source.rs` / `src/dotfiles.rs` — duplicated XDG resolution; moved to
     `src/xdg.rs`.
+11. `src/commands/update.rs` — printed five components while install/repair
+    deployed four with the greeter opt-in; now uses the resolved plan.
 
 ## Verification
 
