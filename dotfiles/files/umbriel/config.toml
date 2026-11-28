@@ -16,7 +16,7 @@
 files = []
 
 [include.optional]
-files = ["/home/riceshower/.config/umbriel/display.toml"]
+files = ["~/.config/umbriel/display.toml"]
 
 # ==============================================================================
 # General
